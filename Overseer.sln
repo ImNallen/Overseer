@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{4F0D54A2-90BC-49A5-9E64-3209B0901D1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{341FE138-1B28-4E3A-B42D-35E847426E64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Overseer.Api", "Overseer.Api\Overseer.Api.csproj", "{255F89B0-EE8B-4360-A8FC-43EFA0067FB1}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C4D585EA-AF2D-4A1B-8266-D874F4AB4D10}"
+	ProjectSection(SolutionItems) = preProject
+		docker-compose.yml = docker-compose.yml
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{255F89B0-EE8B-4360-A8FC-43EFA0067FB1} = {4F0D54A2-90BC-49A5-9E64-3209B0901D1F}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{255F89B0-EE8B-4360-A8FC-43EFA0067FB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{255F89B0-EE8B-4360-A8FC-43EFA0067FB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{255F89B0-EE8B-4360-A8FC-43EFA0067FB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{255F89B0-EE8B-4360-A8FC-43EFA0067FB1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
