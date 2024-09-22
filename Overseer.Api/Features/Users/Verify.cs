@@ -9,19 +9,17 @@ using Overseer.Api.Features.Abstractions;
 
 namespace Overseer.Api.Features.Users;
 
-public record VerifyRequest(Guid Token);
-
 public record VerifyCommand(Guid Token) : ICommand;
 
 public class VerifyEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app) =>
-        app.MapPost("/users/verify", async (
-            VerifyRequest request,
+        app.MapGet("/users/verify", async (
+            Guid token,
             ISender sender,
             CancellationToken cancellationToken) =>
             {
-                var command = new VerifyCommand(request.Token);
+                var command = new VerifyCommand(token);
 
                 Result result = await sender.Send(command, cancellationToken);
 
@@ -54,7 +52,7 @@ public class VerifyHandler(
 
         if (user is null)
         {
-            return Result.Failure(UserErrors.NotFound);
+            return Result.Failure(UserErrors.VerificationFailed);
         }
 
         user.VerifyEmail();

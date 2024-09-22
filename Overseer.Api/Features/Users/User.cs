@@ -45,6 +45,8 @@ public class User : Entity
 
     public string? RefreshToken { get; private set; }
 
+    public DateTime? RefreshTokenExpires { get; private set; }
+
     public static User Create(
         string email,
         string password,
@@ -64,14 +66,15 @@ public class User : Entity
             emailVerificationToken,
             emailVerificationTokenExpiresAt);
 
-        user.RaiseDomainEvent(new UserRegisteredDomainEvent(Guid.NewGuid(), DateTime.UtcNow, user));
+        user.RaiseDomainEvent(new UserRegisteredDomainEvent(Guid.NewGuid(), DateTime.UtcNow, user.Email, user.EmailVerificationToken));
 
         return user;
     }
 
-    public User SetRefreshToken(string refreshToken)
+    public User SetRefreshToken(string refreshToken, DateTime expires)
     {
         RefreshToken = refreshToken;
+        RefreshTokenExpires = expires;
 
         return this;
     }
@@ -98,6 +101,14 @@ public class User : Entity
         Password = password;
         PasswordResetToken = null;
         PasswordResetTokenExpires = null;
+
+        return this;
+    }
+
+    public User Update(string firstName, string lastName)
+    {
+        FirstName = firstName;
+        LastName = lastName;
 
         return this;
     }

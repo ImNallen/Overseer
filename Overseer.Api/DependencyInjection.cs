@@ -1,8 +1,12 @@
 ﻿using System.Reflection;
+using System.Text;
 using Carter;
 using FluentValidation;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 using Overseer.Api.Abstractions.Behaviors;
 using Overseer.Api.Abstractions.Encryption;
@@ -11,6 +15,7 @@ using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Persistence;
+using Overseer.Api.Services.Authentication;
 using Overseer.Api.Services.Encryption;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Time;
@@ -33,7 +38,8 @@ public static class DependencyInjection
             .AddServices()
             .AddCarter()
             .SetupQuartz(configuration)
-            .AddEmail(configuration);
+            .AddEmail(configuration)
+            .AddAuth(configuration);
 
     private static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
     {
@@ -53,7 +59,35 @@ public static class DependencyInjection
     private static IServiceCollection AddSwagger(this IServiceCollection services)
     {
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Overseer API", Version = "v1" });
+
+            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+            {
+                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                Name = "Authorization",
+                In = ParameterLocation.Header,
+                Type = SecuritySchemeType.ApiKey,
+                Scheme = "Bearer"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
         return services;
     }
@@ -87,7 +121,6 @@ public static class DependencyInjection
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-        services.AddSingleton<IPasswordHasher, PasswordHasher>();
 
         return services;
     }
@@ -111,6 +144,44 @@ public static class DependencyInjection
             .AddFluentEmail(configuration["Email:SenderEmail"], configuration["Email:SenderName"])
             .AddRazorRenderer()
             .AddSmtpSender(configuration["Email:Host"], configuration.GetValue<int>("Email:Port"));
+
+        return services;
+    }
+
+    private static IServiceCollection AddAuth(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
+
+        IConfigurationSection jwtSettings = configuration.GetSection("JwtSettings");
+        byte[] key = Encoding.ASCII.GetBytes(jwtSettings["Secret"]!);
+
+        services.AddAuthentication(x =>
+        {
+            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(x =>
+        {
+            x.RequireHttpsMetadata = false; // Set to true in production
+            x.SaveToken = true;
+            x.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidIssuer = jwtSettings["Issuer"],
+                ValidAudience = jwtSettings["Audience"],
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        });
+
+        services.AddAuthorization();
 
         return services;
     }
