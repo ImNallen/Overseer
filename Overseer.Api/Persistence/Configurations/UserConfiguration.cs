@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Overseer.Api.Features.Users;
+using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Persistence.Configurations;
 

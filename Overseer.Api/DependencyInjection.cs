@@ -3,6 +3,7 @@ using System.Text;
 using Carter;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +17,7 @@ using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Persistence;
 using Overseer.Api.Services.Authentication;
+using Overseer.Api.Services.Authorization;
 using Overseer.Api.Services.Encryption;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Time;
@@ -182,6 +184,10 @@ public static class DependencyInjection
         });
 
         services.AddAuthorization();
+
+        services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+        services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
 
         return services;
     }

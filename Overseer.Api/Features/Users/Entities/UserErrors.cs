@@ -1,6 +1,6 @@
 using Overseer.Api.Features.Abstractions;
 
-namespace Overseer.Api.Features.Users;
+namespace Overseer.Api.Features.Users.Entities;
 
 public static class UserErrors
 {

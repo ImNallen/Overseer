@@ -8,6 +8,7 @@ using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Authentication;
 
 namespace Overseer.Api.Features.Users;
@@ -69,6 +70,7 @@ public class LoginHandler(
     {
         User? user = await unitOfWork.Users
             .Where(x => x.Email == request.Email)
+            .Include(x => x.Roles)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)

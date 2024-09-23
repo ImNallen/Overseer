@@ -6,6 +6,7 @@ using Overseer.Api.Abstractions.Exceptions;
 using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Features.Users;
 

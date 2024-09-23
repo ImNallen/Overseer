@@ -7,6 +7,7 @@ using Overseer.Api.Abstractions.Exceptions;
 using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Authentication;
 
 namespace Overseer.Api.Features.Users;
@@ -33,7 +34,7 @@ public class UpdateUserEndpoint : ICarterModule
             return result.IsFailure ? CustomResults.Problem(result) : Results.Ok(new UpdateUserResponse(result.Value.Id, result.Value.Email, result.Value.FirstName, result.Value.LastName));
         })
         .WithTags(Tags.Users)
-        .RequireAuthorization();
+        .RequireAuthorization(Permissions.UsersWrite);
 }
 
 public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>

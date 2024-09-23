@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Overseer.Api.Features.Users;
+using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
 
 namespace Overseer.Api.Abstractions.Persistence;
@@ -7,6 +8,8 @@ namespace Overseer.Api.Abstractions.Persistence;
 public interface IUnitOfWork
 {
     DbSet<User> Users { get; }
+
+    DbSet<Role> Roles { get; }
 
     DbSet<OutboxMessage> OutboxMessages { get; }
 

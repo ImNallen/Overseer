@@ -7,6 +7,7 @@ using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Authentication;
 
 namespace Overseer.Api.Features.Users;
@@ -60,6 +61,7 @@ public class RefreshHandler : ICommandHandler<RefreshCommand, RefreshResponse>
     {
         User? user = await _unitOfWork.Users
             .Where(u => u.RefreshToken == request.RefreshToken)
+            .Include(u => u.Roles)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (user is null)

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Users;
+using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Serialization;
 
@@ -13,6 +14,12 @@ public class OverseerDbContext(
     DbContextOptions<OverseerDbContext> options) : DbContext(options), IUnitOfWork
 {
     public DbSet<User> Users => Set<User>();
+
+    public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<Permission> Permissions => Set<Permission>();
+
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 

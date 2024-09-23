@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Users;
+using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Services.Authentication;
 
@@ -57,6 +58,9 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName),
             new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName),
         };
+
+        IEnumerable<Claim> rolesClaims = user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name));
+        claims = claims.Concat(rolesClaims).ToArray();
 
         var securityToken = new JwtSecurityToken(
             issuer: _jwtSettings.Issuer,

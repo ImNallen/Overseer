@@ -1,10 +1,12 @@
 ﻿using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Users.Events;
 
-namespace Overseer.Api.Features.Users;
+namespace Overseer.Api.Features.Users.Entities;
 
 public class User : Entity
 {
+    private readonly List<Role> _roles = new();
+
     private User(
         Guid id,
         string email,
@@ -47,6 +49,8 @@ public class User : Entity
 
     public DateTime? RefreshTokenExpires { get; private set; }
 
+    public IReadOnlyCollection<Role> Roles => _roles.AsReadOnly();
+
     public static User Create(
         string email,
         string password,
@@ -65,6 +69,8 @@ public class User : Entity
             isEmailVerified,
             emailVerificationToken,
             emailVerificationTokenExpiresAt);
+
+        user._roles.Add(Role.User);
 
         user.RaiseDomainEvent(new UserRegisteredDomainEvent(Guid.NewGuid(), DateTime.UtcNow, user.Email, user.EmailVerificationToken));
 

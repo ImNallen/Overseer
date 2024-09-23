@@ -9,6 +9,7 @@ using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Features.Users;
 
@@ -100,6 +101,11 @@ public class RegisterHandler(
                 isEmailVerified: request.Verified ?? false,
                 emailVerificationToken: request.Verified ?? false ? null : Guid.NewGuid(),
                 emailVerificationTokenExpiresAt: request.Verified ?? false ? null : dateTimeProvider.UtcNow.AddDays(5));
+
+            foreach (Role role in user.Roles)
+            {
+                unitOfWork.Roles.Attach(role);
+            }
 
             await unitOfWork.Users.AddAsync(user, cancellationToken);
 

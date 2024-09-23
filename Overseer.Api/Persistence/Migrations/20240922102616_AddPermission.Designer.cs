@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Overseer.Api.Persistence;
@@ -11,9 +12,11 @@ using Overseer.Api.Persistence;
 namespace Overseer.Api.Persistence.Migrations
 {
     [DbContext(typeof(OverseerDbContext))]
-    partial class OverseerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922102616_AddPermission")]
+    partial class AddPermission
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -35,7 +38,12 @@ namespace Overseer.Api.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Permissions", "public");
 
@@ -90,8 +98,6 @@ namespace Overseer.Api.Persistence.Migrations
                         .HasColumnType("integer");
 
                     b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
 
                     b.ToTable("RolePermissions", "public");
 
@@ -217,23 +223,11 @@ namespace Overseer.Api.Persistence.Migrations
                     b.ToTable("RoleUser", "public");
                 });
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.RolePermission", b =>
+            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>
                 {
-                    b.HasOne("Overseer.Api.Features.Users.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Overseer.Api.Features.Users.Entities.Role", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
+                    b.HasOne("Overseer.Api.Features.Users.Entities.Role", null)
+                        .WithMany("Permissions")
+                        .HasForeignKey("RoleId");
                 });
 
             modelBuilder.Entity("RoleUser", b =>
@@ -251,14 +245,9 @@ namespace Overseer.Api.Persistence.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
             modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Role", b =>
                 {
-                    b.Navigation("RolePermissions");
+                    b.Navigation("Permissions");
                 });
 #pragma warning restore 612, 618
         }

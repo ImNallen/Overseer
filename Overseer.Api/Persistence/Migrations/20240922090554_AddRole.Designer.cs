@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Overseer.Api.Persistence;
@@ -11,9 +12,11 @@ using Overseer.Api.Persistence;
 namespace Overseer.Api.Persistence.Migrations
 {
     [DbContext(typeof(OverseerDbContext))]
-    partial class OverseerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240922090554_AddRole")]
+    partial class AddRole
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -23,7 +26,7 @@ namespace Overseer.Api.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>
+            modelBuilder.Entity("Overseer.Api.Features.Users.Role", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -37,88 +40,10 @@ namespace Overseer.Api.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Permissions", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "users:read"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "users:write"
-                        });
+                    b.ToTable("Role", "public");
                 });
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "Admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "User"
-                        });
-                });
-
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.RolePermission", b =>
-                {
-                    b.Property<int>("RoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("PermissionId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RoleId", "PermissionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("RolePermissions", "public");
-
-                    b.HasData(
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 1,
-                            PermissionId = 2
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 1
-                        },
-                        new
-                        {
-                            RoleId = 2,
-                            PermissionId = 2
-                        });
-                });
-
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.User", b =>
+            modelBuilder.Entity("Overseer.Api.Features.Users.User", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -217,48 +142,19 @@ namespace Overseer.Api.Persistence.Migrations
                     b.ToTable("RoleUser", "public");
                 });
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.RolePermission", b =>
-                {
-                    b.HasOne("Overseer.Api.Features.Users.Entities.Permission", "Permission")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("PermissionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Overseer.Api.Features.Users.Entities.Role", "Role")
-                        .WithMany("RolePermissions")
-                        .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Permission");
-
-                    b.Navigation("Role");
-                });
-
             modelBuilder.Entity("RoleUser", b =>
                 {
-                    b.HasOne("Overseer.Api.Features.Users.Entities.Role", null)
+                    b.HasOne("Overseer.Api.Features.Users.Role", null)
                         .WithMany()
                         .HasForeignKey("RolesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Overseer.Api.Features.Users.Entities.User", null)
+                    b.HasOne("Overseer.Api.Features.Users.User", null)
                         .WithMany()
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>
-                {
-                    b.Navigation("RolePermissions");
-                });
-
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Role", b =>
-                {
-                    b.Navigation("RolePermissions");
                 });
 #pragma warning restore 612, 618
         }
