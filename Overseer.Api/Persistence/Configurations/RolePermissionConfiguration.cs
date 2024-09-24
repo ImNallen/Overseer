@@ -23,25 +23,11 @@ public class RolePermissionConfiguration : IEntityTypeConfiguration<RolePermissi
             .HasForeignKey(rp => rp.PermissionId);
 
         builder.HasData(
-            new RolePermission
-            {
-                RoleId = Role.Admin.Id,
-                PermissionId = Permission.UsersRead.Id,
-            },
-            new RolePermission
-            {
-                RoleId = Role.Admin.Id,
-                PermissionId = Permission.UsersWrite.Id,
-            },
-            new RolePermission
-            {
-                RoleId = Role.User.Id,
-                PermissionId = Permission.UsersRead.Id,
-            },
-            new RolePermission
-            {
-                RoleId = Role.User.Id,
-                PermissionId = Permission.UsersWrite.Id,
-            });
+            new RolePermission { RoleId = Role.Admin.Id, PermissionId = Permission.UsersRead.Id },
+            new RolePermission { RoleId = Role.Admin.Id, PermissionId = Permission.UsersWrite.Id },
+            new RolePermission { RoleId = Role.Admin.Id, PermissionId = Permission.UsersDelete.Id },
+            new RolePermission { RoleId = Role.User.Id, PermissionId = Permission.UsersRead.Id },
+            new RolePermission { RoleId = Role.User.Id, PermissionId = Permission.UsersWrite.Id },
+            new RolePermission { RoleId = Role.ReadOnly.Id, PermissionId = Permission.UsersRead.Id });
     }
 }

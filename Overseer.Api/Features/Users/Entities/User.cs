@@ -56,6 +56,7 @@ public class User : Entity
         string password,
         string firstName,
         string lastName,
+        Role role,
         bool isEmailVerified = false,
         Guid? emailVerificationToken = null,
         DateTime? emailVerificationTokenExpiresAt = null)
@@ -70,7 +71,7 @@ public class User : Entity
             emailVerificationToken,
             emailVerificationTokenExpiresAt);
 
-        user._roles.Add(Role.User);
+        user._roles.Add(role);
 
         user.RaiseDomainEvent(new UserRegisteredDomainEvent(Guid.NewGuid(), DateTime.UtcNow, user.Email, user.EmailVerificationToken));
 

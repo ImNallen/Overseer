@@ -7,22 +7,17 @@ using Overseer.Api.Services.Authentication;
 namespace Overseer.Api.Services.Authorization;
 
 public class PermissionAuthorizationHandler(
-    IUnitOfWork unitOfWork,
-    ILogger<PermissionAuthorizationHandler> logger)
+    IUnitOfWork unitOfWork)
     : AuthorizationHandler<PermissionRequirement>
 {
     protected override async Task HandleRequirementAsync(
         AuthorizationHandlerContext context,
         PermissionRequirement requirement)
     {
-        logger.LogInformation("Handling permission requirement: {Permission}", requirement.Permission);
-
         if (context.User.Identity is not { IsAuthenticated: true })
         {
             return;
         }
-
-        logger.LogInformation("User is authenticated: {IsAuthenticated}", context.User.Identity.IsAuthenticated);
 
         Guid userId = context.User.GetUserId();
 
@@ -39,19 +34,13 @@ public class PermissionAuthorizationHandler(
             return;
         }
 
-        logger.LogInformation("User found: {User}", user);
-
         var userPermissions = user.Roles
             .SelectMany(x => x.RolePermissions)
             .Select(x => x.Permission.Name)
             .ToHashSet();
 
-        logger.LogInformation("User permissions: {Permissions}", userPermissions);
-
         if (userPermissions.Contains(requirement.Permission))
         {
-            logger.LogInformation("User has permission: {Permission}", requirement.Permission);
-
             context.Succeed(requirement);
         }
     }

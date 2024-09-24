@@ -17,13 +17,15 @@ public record RegisterRequest(
     string Email,
     string Password,
     string FirstName,
-    string LastName);
+    string LastName,
+    string Role);
 
 public record RegisterCommand(
     string Email,
     string Password,
     string FirstName,
     string LastName,
+    string Role,
     bool? Verified = false) : ICommand<Guid>;
 
 public class RegisterEndpoint : ICarterModule
@@ -40,6 +42,7 @@ public class RegisterEndpoint : ICarterModule
                     request.Password,
                     request.FirstName,
                     request.LastName,
+                    request.Role,
                     verified);
 
                 Result<Guid> result = await sender.Send(command, cancellationToken);
@@ -71,6 +74,11 @@ public class RegisterValidator : AbstractValidator<RegisterCommand>
 
         RuleFor(x => x.LastName)
             .NotEmpty();
+
+        RuleFor(x => x.Role)
+            .NotEmpty()
+            .Must(x => Role.All.Exists(r => r.Name == x))
+            .WithMessage("Invalid role");
     }
 }
 
@@ -93,11 +101,14 @@ public class RegisterHandler(
                 return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Email)));
             }
 
+            Role roleToAssign = Role.All.First(r => r.Name == request.Role);
+
             var user = User.Create(
                 request.Email,
                 passwordHasher.Hash(request.Password),
                 request.FirstName,
                 request.LastName,
+                roleToAssign,
                 isEmailVerified: request.Verified ?? false,
                 emailVerificationToken: request.Verified ?? false ? null : Guid.NewGuid(),
                 emailVerificationTokenExpiresAt: request.Verified ?? false ? null : dateTimeProvider.UtcNow.AddDays(5));

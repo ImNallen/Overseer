@@ -6,6 +6,8 @@ public class Permission
 
     public static readonly Permission UsersWrite = new(2, "users:write");
 
+    public static readonly Permission UsersDelete = new(3, "users:delete");
+
     public Permission(int id, string name)
     {
         Id = id;

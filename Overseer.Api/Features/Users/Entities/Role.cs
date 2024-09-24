@@ -6,6 +6,10 @@ public sealed class Role
 
     public static readonly Role User = new(2, "User");
 
+    public static readonly Role ReadOnly = new(3, "ReadOnly");
+
+    public static readonly List<Role> All = [Admin, User, ReadOnly];
+
     public Role(int id, string name)
     {
         Id = id;

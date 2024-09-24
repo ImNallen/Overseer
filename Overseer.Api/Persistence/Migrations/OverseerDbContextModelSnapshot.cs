@@ -49,6 +49,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             Id = 2,
                             Name = "users:write"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "users:delete"
                         });
                 });
 
@@ -78,6 +83,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             Id = 2,
                             Name = "User"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "ReadOnly"
                         });
                 });
 
@@ -108,6 +118,11 @@ namespace Overseer.Api.Persistence.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 3
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -115,6 +130,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 1
                         });
                 });
 

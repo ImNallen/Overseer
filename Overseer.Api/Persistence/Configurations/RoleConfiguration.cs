@@ -22,6 +22,6 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .WithOne()
             .HasForeignKey(rp => rp.RoleId);
 
-        builder.HasData(Role.Admin, Role.User);
+        builder.HasData(Role.Admin, Role.User, Role.ReadOnly);
     }
 }

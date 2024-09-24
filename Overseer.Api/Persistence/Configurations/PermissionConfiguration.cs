@@ -17,6 +17,9 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             .WithOne()
             .HasForeignKey(rp => rp.PermissionId);
 
-        builder.HasData(Permission.UsersRead, Permission.UsersWrite);
+        builder.HasData(
+            Permission.UsersRead,
+            Permission.UsersWrite,
+            Permission.UsersDelete);
     }
 }

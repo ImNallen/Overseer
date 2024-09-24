@@ -12,8 +12,8 @@ using Overseer.Api.Persistence;
 namespace Overseer.Api.Persistence.Migrations
 {
     [DbContext(typeof(OverseerDbContext))]
-    [Migration("20240923063016_UpdatePermissionAndRole")]
-    partial class UpdatePermissionAndRole
+    [Migration("20240923150906_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             Id = 2,
                             Name = "users:write"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "users:delete"
                         });
                 });
 
@@ -81,6 +86,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             Id = 2,
                             Name = "User"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "ReadOnly"
                         });
                 });
 
@@ -111,6 +121,11 @@ namespace Overseer.Api.Persistence.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 3
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -118,6 +133,11 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 2
+                        },
+                        new
+                        {
+                            RoleId = 3,
+                            PermissionId = 1
                         });
                 });
 

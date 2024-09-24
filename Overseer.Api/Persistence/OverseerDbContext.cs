@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Products.Entities;
 using Overseer.Api.Features.Users;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
@@ -16,6 +17,8 @@ public class OverseerDbContext(
     public DbSet<User> Users => Set<User>();
 
     public DbSet<Role> Roles => Set<Role>();
+
+    public DbSet<Product> Products => Set<Product>();
 
     public DbSet<Permission> Permissions => Set<Permission>();
 
