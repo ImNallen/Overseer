@@ -13,6 +13,17 @@
     depends_on:
       - postgres
 
+  overseer-web:
+    image: overseer.web
+    container_name: Web
+    build:
+      context: .
+      dockerfile: Overseer.Web/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+    ports:
+      - "3000:80"
+
   postgres:
     image: postgres:latest
     container_name: postgres
