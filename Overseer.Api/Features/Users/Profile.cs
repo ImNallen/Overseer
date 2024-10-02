@@ -32,7 +32,7 @@ public class ProfileEndpoint : ICarterModule
                 return CustomResults.Problem(result);
             }
 
-            return Results.Ok(new ProfileResponse(result.Value.Email, result.Value.FirstName, result.Value.LastName));
+            return Results.Ok(new ProfileResponse(result.Value.Email, result.Value.FirstName!, result.Value.LastName!));
         })
         .WithTags(Tags.Users)
         .RequireAuthorization(Permissions.UsersRead);
@@ -51,6 +51,11 @@ public class ProfileHandler(
         if (user is null)
         {
             return Result.Failure<User>(UserErrors.NotFound);
+        }
+
+        if (user.Status != UserStatus.Verified)
+        {
+            return Result.Failure<User>(UserErrors.NotVerified);
         }
 
         return user;

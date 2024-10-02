@@ -31,7 +31,7 @@ public class UpdateUserEndpoint : ICarterModule
 
             Result<User> result = await sender.Send(command, cancellationToken);
 
-            return result.IsFailure ? CustomResults.Problem(result) : Results.Ok(new UpdateUserResponse(result.Value.Id, result.Value.Email, result.Value.FirstName, result.Value.LastName));
+            return result.IsFailure ? CustomResults.Problem(result) : Results.Ok(new UpdateUserResponse(result.Value.Id, result.Value.Email, result.Value.FirstName!, result.Value.LastName!));
         })
         .WithTags(Tags.Users)
         .RequireAuthorization(Permissions.UsersWrite);
@@ -59,6 +59,11 @@ public class UpdateUserHandler(
         if (user is null)
         {
             return Result.Failure<User>(UserErrors.NotFound);
+        }
+
+        if (user.Status != UserStatus.Verified)
+        {
+            return Result.Failure<User>(UserErrors.NotVerified);
         }
 
         user.Update(request.FirstName, request.LastName);

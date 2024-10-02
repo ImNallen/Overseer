@@ -1,14 +1,31 @@
 ﻿@using Overseer.Web.Features
 
-<Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router>
+<ThemeWrapper>
+    <Router AppAssembly="@typeof(App).Assembly">
+        <Found Context="routeData">
+            <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <div class="flex items-center justify-center">
+                    <div class="mt-40 p-8 rounded-lg bg-light-surface dark:bg-dark-surface">
+                        <div class="text-center">
+                            <h1 class="text-8xl font-bold bg-gradient-to-br from-accent to-primary text-transparent bg-clip-text">404</h1>
+                            <h2 class="text-6xl mt-8 font-bold bg-gradient-to-br from-accent to-primary text-transparent bg-clip-text">Page Not Found</h2>
+                            <p class="text-sm my-8 text-text-primary-light dark:text-text-primary-dark">Oops! Looks like our AI took a coffee break and forgot to build this page.</p>
+                            <a href="/" class="p-4 rounded shadow-md inline-block bg-light-foreground dark:bg-dark-foreground border-none cursor-pointer transition-all duration-300 ease-in-out transform hover:scale-110 hover:rotate-3 hover:shadow-lg">
+                                <div class="flex items-center justify-center">
+                                    <i class="fas fa-home mr-2"></i>
+                                    <span class="mx-1">Back to home</span>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </LayoutView>
+        </NotFound>
+    </Router>
+    <GlobalToast />
+</ThemeWrapper>

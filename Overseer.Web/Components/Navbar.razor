@@ -1,0 +1,108 @@
+@inject ThemeService ThemeService
+
+<nav>
+    <div class="container mx-auto">
+        <div class="flex justify-between items-center py-2">
+            <div class="flex items-center space-x-2">
+                <a href="/" class="flex items-center group">
+                    <img src="images/overseer_logo.svg" alt="Overseer Logo" class="h-12 w-12 mr-2 transition-transform duration-300 ease-in-out transform group-hover:rotate-6 group-hover:scale-125" />
+                </a>
+            </div>
+
+            <div class="hidden md:flex justify-between items-center space-x-2">
+                <a href="/" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-home text-xl text-black dark:text-white group-hover:text-white"></i>
+                </a>
+                <a href="/customers" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-users text-xl text-black dark:text-white group-hover:text-white"></i>
+                </a>
+                <a href="/products" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-box text-xl text-black dark:text-white group-hover:text-white"></i>
+                </a>
+                <a href="/orders" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-xl text-black dark:text-white group-hover:text-white"></i>
+                </a>
+                <a href="/invoices" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-file-invoice text-xl text-black dark:text-white group-hover:text-white"></i>
+                </a>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                    <i class="fas fa-bell text-xl text-black dark:text-white group-hover:text-white"></i>
+                </button>
+                <button @onclick="ToggleTheme" class="group flex items-center w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded justify-center">
+                    @if (!ThemeService.IsDarkMode)
+                    {
+                        <i class="fas fa-moon text-xl text-black dark:text-white group-hover:text-white"></i>
+                    }
+                    else
+                    {
+                        <i class="fas fa-sun text-xl text-black dark:text-white group-hover:text-white"></i>
+                    }
+                </button>
+                <div class="relative hidden md:block">
+                    <button @onclick="ToggleUserDropdown" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                        <i class="fas fa-user text-xl text-black dark:text-white group-hover:text-white"></i>
+                    </button>
+                    @if (isUserDropdownOpen)
+                    {
+                        <div class="absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-light-foreground dark:bg-dark-foreground text-black dark:text-white ring-1 ring-black ring-opacity-5 z-50">
+                            <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                <a href="/profile" class="block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Profile</a>
+                                <a href="/orders" class="block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Orders</a>
+                                <a href="/settings" class="block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Settings</a>
+                                <a href="/logout" class="block px-4 py-2 text-sm hover:bg-gray-100" role="menuitem">Logout</a>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="md:hidden">
+                    <button @onclick="ToggleHamburgerMenu" class="group w-12 h-12 bg-light-surface dark:bg-dark-surface hover:bg-gradient-to-br hover:from-accent hover:to-primary shadow-md rounded flex items-center justify-center">
+                        <i class="fas fa-bars text-xl text-black dark:text-white group-hover:text-white"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+@if (isHamburgerMenuOpen)
+{
+    <div class="md:hidden fixed inset-0 z-50 bg-light-background dark:bg-dark-background">
+        <div class="flex flex-col items-center justify-center h-full">
+            <button @onclick="ToggleHamburgerMenu" class="absolute top-8 right-12 text-2xl">
+                <i class="fas fa-times hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300"></i>
+            </button>
+            <a href="/" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Home</a>
+            <a href="/customers" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Customers</a>
+            <a href="/products" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Products</a>
+            <a href="/orders" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Orders</a>
+            <a href="/invoices" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Invoices</a>
+            <a href="/profile" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Profile</a>
+            <a href="/settings" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Settings</a>
+            <a href="/logout" class="py-2 text-xl hover:bg-gradient-to-br hover:from-accent hover:to-primary hover:text-transparent hover:bg-clip-text transition-colors duration-300">Logout</a>
+        </div>
+    </div>
+}
+
+@code {
+    private bool isUserDropdownOpen = false;
+    private bool isHamburgerMenuOpen = false;
+
+    private async Task ToggleTheme()
+    {
+        await ThemeService.ToggleThemeAsync();
+        StateHasChanged();
+    }
+
+    private void ToggleUserDropdown()
+    {
+        isUserDropdownOpen = !isUserDropdownOpen;
+    }
+
+    private void ToggleHamburgerMenu()
+    {
+        isHamburgerMenuOpen = !isHamburgerMenuOpen;
+    }
+}

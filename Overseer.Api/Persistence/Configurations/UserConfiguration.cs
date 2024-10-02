@@ -15,19 +15,42 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(255)
             .IsRequired();
 
+        builder.Property(u => u.Username)
+            .HasMaxLength(50);
+
         builder.Property(u => u.Password)
-            .HasMaxLength(255)
-            .IsRequired();
+            .HasMaxLength(255);
 
         builder.Property(u => u.FirstName)
-            .HasMaxLength(50)
-            .IsRequired();
+            .HasMaxLength(50);
 
         builder.Property(u => u.LastName)
-            .HasMaxLength(50)
-            .IsRequired();
+            .HasMaxLength(50);
+
+        builder.Property(u => u.Status)
+            .IsRequired()
+            .HasConversion<string>();
 
         builder.HasIndex(u => u.Email)
             .IsUnique();
+
+        builder.HasIndex(u => u.Username)
+            .IsUnique();
+
+        builder.HasIndex(u => u.InviteToken)
+            .IsUnique();
+
+        builder.HasIndex(u => u.PasswordResetToken)
+            .IsUnique();
+
+        builder.HasIndex(u => u.RefreshToken)
+            .IsUnique();
+
+        builder.HasIndex(u => u.EmailVerificationToken)
+            .IsUnique();
+
+        builder.HasOne(u => u.Organisation)
+            .WithMany(o => o.Users)
+            .HasForeignKey(u => u.OrganisationId);
     }
 }

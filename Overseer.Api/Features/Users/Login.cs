@@ -13,11 +13,11 @@ using Overseer.Api.Services.Authentication;
 
 namespace Overseer.Api.Features.Users;
 
-public record LoginRequest(string Email, string Password);
+public record LoginRequest(string Username, string Password);
 
 public record TokenResponse(string AccessToken, int ExpiresIn, string RefreshToken, int RefreshExpiresIn);
 
-public record LoginCommand(string Email, string Password) : ICommand<Token>;
+public record LoginCommand(string Username, string Password) : ICommand<Token>;
 
 public class LoginEndpoint : ICarterModule
 {
@@ -27,7 +27,7 @@ public class LoginEndpoint : ICarterModule
             ISender sender,
             CancellationToken cancellationToken) =>
         {
-            var command = new LoginCommand(request.Email, request.Password);
+            var command = new LoginCommand(request.Username, request.Password);
 
             Result<Token> result = await sender.Send(command, cancellationToken);
 
@@ -50,9 +50,8 @@ public class LoginValidator : AbstractValidator<LoginCommand>
 {
     public LoginValidator()
     {
-        RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress();
+        RuleFor(x => x.Username)
+            .NotEmpty();
 
         RuleFor(x => x.Password)
             .NotEmpty();
@@ -69,7 +68,7 @@ public class LoginHandler(
     public async Task<Result<Token>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         User? user = await unitOfWork.Users
-            .Where(x => x.Email == request.Email)
+            .Where(x => x.Username == request.Username)
             .Include(x => x.Roles)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -78,7 +77,12 @@ public class LoginHandler(
             return Result.Failure<Token>(UserErrors.InvalidCredentials);
         }
 
-        if (!passwordHasher.Verify(request.Password, user.Password))
+        if (user.Status != UserStatus.Verified)
+        {
+            return Result.Failure<Token>(UserErrors.NotVerified);
+        }
+
+        if (!passwordHasher.Verify(request.Password, user.Password!))
         {
             return Result.Failure<Token>(UserErrors.InvalidCredentials);
         }

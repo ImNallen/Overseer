@@ -1,52 +1,30 @@
 ﻿@page "/"
 
-<PageTitle>Overseer - Your All-in-One Management Solution</PageTitle>
+<PageTitle>Overseer</PageTitle>
 
-<div class="hero h-full bg-base-200">
-    <div class="hero-content text-center">
-        <div class="max-w-full">
-            <h1 class="text-5xl md:text-6xl lg:text-7xl font-bold mb-8 text-primary animate__animated animate__fadeInDown">Welcome to Overseer</h1>
-            <p class="text-xl md:text-2xl mb-12 opacity-90 max-w-3xl mx-auto leading-relaxed animate__animated animate__fadeIn animate__delay-1s">
-                Elevate your workflow with our all-in-one hub for administration, shopping, and support. 
-                Experience effortless management at your fingertips.
-            </p>
-            <h2 class="text-3xl md:text-4xl font-semibold mb-10 animate__animated animate__fadeIn animate__delay-2s">Explore Our Services</h2>
-            <div class="flex flex-col md:flex-row justify-center items-center gap-6 w-full max-w-4xl mx-auto">
-                @foreach (var app in applications)
-                {
-                    <a href="@app.Url" class="btn btn-primary btn-lg w-full md:w-auto flex items-center justify-center gap-4 transition-all duration-300 hover:scale-105">
-                        <i class="@app.Icon text-2xl"></i>
-                        <span>@app.Name</span>
-                    </a>
-                }
-            </div>
-        </div>
+<div class="mt-6">
+    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <StatCard 
+            Title="Revenue" 
+            Value="$8,430" 
+            Trend="+45" 
+            IsPositive="true" 
+            Icon="fas fa-dollar-sign" />
+        
+        <StatCard 
+            Title="Sales" 
+            Value="211" 
+            Trend="-10" 
+            IsPositive="false" 
+            Icon="fas fa-shopping-cart" />
+        
+        <StatCard 
+            Title="Customers" 
+            Value="140" 
+            Trend="+4" 
+            IsPositive="true" 
+            Icon="fas fa-users" />
     </div>
 </div>
-
-@code {
-    private List<ApplicationInfo> applications = new List<ApplicationInfo>
-    {
-        new ApplicationInfo("Admin", "Manage users, roles, and system settings with ease", "/admin", "Access Admin", "fas fa-cog"),
-        new ApplicationInfo("Shop", "Browse and purchase products in our intuitive marketplace", "/shop", "Visit Shop", "fas fa-shopping-cart"),
-        new ApplicationInfo("Support", "Get help and submit tickets for prompt assistance", "/support", "Contact Support", "fas fa-life-ring")
-    };
-
-    private class ApplicationInfo
-    {
-        public string Name { get; set; }
-        public string Description { get; set; }
-        public string Url { get; set; }
-        public string ButtonText { get; set; }
-        public string Icon { get; set; }
-
-        public ApplicationInfo(string name, string description, string url, string buttonText, string icon)
-        {
-            Name = name;
-            Description = description;
-            Url = url;
-            ButtonText = buttonText;
-            Icon = icon;
-        }
-    }
-}

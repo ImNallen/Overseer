@@ -156,6 +156,7 @@ public static class DependencyInjection
     {
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IPasswordGenerator, PasswordGenerator>();
         services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));
 
         IConfigurationSection jwtSettings = configuration.GetSection("JwtSettings");

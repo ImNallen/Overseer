@@ -1,0 +1,53 @@
+@implements IDisposable
+
+<div class="fixed top-5 right-5 z-50 space-y-4">
+    @foreach (var toast in _toasts)
+    {
+        <Toast @key="toast.Id" Title="@toast.Title" Message="@toast.Message" Type="@toast.Type" OnClose="() => RemoveToast(toast.Id)" />
+    }
+</div>
+
+@code {
+    private List<ToastInfo> _toasts = new();
+
+    [Inject]
+    private ToastService ToastService { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        ToastService.OnShow += ShowNotification;
+    }
+
+    private Task ShowNotification(string title, string message, Toast.ToastType type)
+    {
+        var toast = new ToastInfo
+        {
+            Id = Guid.NewGuid(),
+            Title = title,
+            Message = message,
+            Type = type
+        };
+        _toasts.Add(toast);
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private void RemoveToast(Guid id)
+    {
+        _toasts.RemoveAll(t => t.Id == id);
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        ToastService.OnShow -= ShowNotification;
+    }
+
+    private class ToastInfo
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public Toast.ToastType Type { get; set; }
+    }
+}

@@ -26,7 +26,7 @@ public class DeleteUserEndpoint : ICarterModule
             return result.IsSuccess ? Results.NoContent() : CustomResults.Problem(result);
         })
         .WithTags(Tags.Users)
-        .RequireAuthorization(Permissions.UsersDelete);
+        .RequireAuthorization(Permissions.Admin);
 }
 
 public class DeleteUserHandler(IUnitOfWork unitOfWork) : ICommandHandler<DeleteUserCommand>

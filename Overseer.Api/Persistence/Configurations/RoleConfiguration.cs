@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Overseer.Api.Features.Users;
 using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Persistence.Configurations;
@@ -22,6 +21,6 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .WithOne()
             .HasForeignKey(rp => rp.RoleId);
 
-        builder.HasData(Role.Admin, Role.User, Role.ReadOnly);
+        builder.HasData(Role.Admin, Role.User);
     }
 }

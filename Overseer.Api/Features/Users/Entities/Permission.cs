@@ -8,6 +8,8 @@ public class Permission
 
     public static readonly Permission UsersDelete = new(3, "users:delete");
 
+    public static readonly Permission Admin = new(4, "admin");
+
     public Permission(int id, string name)
     {
         Id = id;

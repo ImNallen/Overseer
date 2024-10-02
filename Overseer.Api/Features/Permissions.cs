@@ -1,7 +1,9 @@
-namespace Overseer.Api.Features.Abstractions;
+namespace Overseer.Api.Features;
 
 public static class Permissions
 {
+    public const string Admin = "admin";
+
     public const string UsersRead = "users:read";
 
     public const string UsersWrite = "users:write";

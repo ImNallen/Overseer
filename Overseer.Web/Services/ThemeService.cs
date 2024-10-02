@@ -1,30 +1,34 @@
-using Microsoft.JSInterop;
+using System;
+using Blazored.LocalStorage;
 
 namespace Overseer.Web.Services;
 
-public class ThemeService
+public class ThemeService(ILocalStorageService localStorage)
 {
-    private readonly IJSRuntime _jsRuntime;
+#pragma warning disable CA1003
+    public event Action? OnThemeChange;
+#pragma warning restore CA1003
 
-    public ThemeService(IJSRuntime jsRuntime) => _jsRuntime = jsRuntime;
+    public bool IsDarkMode { get; private set; }
 
-#pragma warning disable CA1003 // Use generic event handler instances
-    public event Action? OnThemeChanged;
-#pragma warning restore CA1003 // Use generic event handler instances
-
-    public async Task<string> GetThemeAsync() => await _jsRuntime.InvokeAsync<string>("localStorage.getItem", "theme") ?? "light";
+    public async Task<string> GetThemeAsync()
+    {
+        string theme = await localStorage.GetItemAsync<string>("theme") ?? "dark";
+        IsDarkMode = theme == "dark";
+        return theme;
+    }
 
     public async Task SetThemeAsync(string theme)
     {
-        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "theme", theme);
-        await _jsRuntime.InvokeVoidAsync("document.documentElement.setAttribute", "data-theme", theme);
-        OnThemeChanged?.Invoke();
+        await localStorage.SetItemAsync("theme", theme);
+        IsDarkMode = theme == "dark";
+        OnThemeChange?.Invoke();
     }
 
     public async Task ToggleThemeAsync()
     {
         string currentTheme = await GetThemeAsync();
-        string newTheme = currentTheme == "light" ? "dark" : "light";
+        string newTheme = currentTheme == "dark" ? "light" : "dark";
         await SetThemeAsync(newTheme);
     }
 }

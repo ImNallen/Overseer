@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Organisations.Entities;
 using Overseer.Api.Features.Products.Entities;
-using Overseer.Api.Features.Users;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Serialization;
@@ -25,6 +25,8 @@ public class OverseerDbContext(
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
+    public DbSet<Organisation> Organisations => Set<Organisation>();
 
     public override async Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default)

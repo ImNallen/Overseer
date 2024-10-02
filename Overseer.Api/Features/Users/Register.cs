@@ -1,7 +1,6 @@
 ﻿using Carter;
 using FluentValidation;
 using MediatR;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Overseer.Api.Abstractions.Encryption;
 using Overseer.Api.Abstractions.Exceptions;
@@ -13,115 +12,65 @@ using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Features.Users;
 
-public record RegisterRequest(
-    string Email,
-    string Password,
-    string FirstName,
-    string LastName,
-    string Role);
+public record RegisterUserRequest(string Username, string Password, string FirstName, string LastName);
 
-public record RegisterCommand(
-    string Email,
-    string Password,
-    string FirstName,
-    string LastName,
-    string Role,
-    bool? Verified = false) : ICommand<Guid>;
+public record RegisterUserCommand(Guid InviteToken, string Username, string Password, string FirstName, string LastName) : ICommand<Guid>;
 
-public class RegisterEndpoint : ICarterModule
+public class RegisterUserEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app) =>
-        app.MapPost("/users/register", async (
-                RegisterRequest request,
-                [FromQuery] bool? verified,
-                ISender sender,
-                CancellationToken cancellationToken) =>
+        app.MapPost("/users/{invite:Guid}", async (
+            Guid invite,
+            RegisterUserRequest request,
+            ISender sender,
+            CancellationToken cancellationToken) =>
+        {
+            var command = new RegisterUserCommand(invite, request.Username, request.Password, request.FirstName, request.LastName);
+
+            Result<Guid> result = await sender.Send(command, cancellationToken);
+
+            if (result.IsFailure)
             {
-                var command = new RegisterCommand(
-                    request.Email,
-                    request.Password,
-                    request.FirstName,
-                    request.LastName,
-                    request.Role,
-                    verified);
+                return CustomResults.Problem(result);
+            }
 
-                Result<Guid> result = await sender.Send(command, cancellationToken);
-
-                if (result.IsFailure)
-                {
-                    return CustomResults.Problem(result);
-                }
-
-                return Results.Ok(result.Value);
-            })
-            .WithTags(Tags.Users)
-            .AllowAnonymous();
+            return Results.Ok(result.Value);
+        })
+        .WithTags(Tags.Users)
+        .AllowAnonymous();
 }
 
-public class RegisterValidator : AbstractValidator<RegisterCommand>
+public class RegisterUserValidator : AbstractValidator<RegisterUserCommand>
 {
-    public RegisterValidator()
+    public RegisterUserValidator()
     {
-        RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress();
-
-        RuleFor(x => x.Password)
-            .NotEmpty();
-
-        RuleFor(x => x.FirstName)
-            .NotEmpty();
-
-        RuleFor(x => x.LastName)
-            .NotEmpty();
-
-        RuleFor(x => x.Role)
-            .NotEmpty()
-            .Must(x => Role.All.Exists(r => r.Name == x))
-            .WithMessage("Invalid role");
+        RuleFor(x => x.InviteToken).NotEmpty();
+        RuleFor(x => x.Username).NotEmpty();
+        RuleFor(x => x.Password).NotEmpty();
+        RuleFor(x => x.FirstName).NotEmpty();
+        RuleFor(x => x.LastName).NotEmpty();
     }
 }
 
-public class RegisterHandler(
+public class RegisterUserHandler(
     IUnitOfWork unitOfWork,
-    IDateTimeProvider dateTimeProvider,
-    IPasswordHasher passwordHasher)
-    : ICommandHandler<RegisterCommand, Guid>
+    IPasswordHasher passwordHasher,
+    IDateTimeProvider dateTimeProvider) : ICommandHandler<RegisterUserCommand, Guid>
 {
-    public async Task<Result<Guid>> Handle(
-        RegisterCommand request,
-        CancellationToken cancellationToken)
+    public async Task<Result<Guid>> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
+    {
+        User? user = await unitOfWork.Users.Where(x => x.InviteToken == request.InviteToken)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (user is null)
         {
-            bool isEmailInUse = await unitOfWork.Users.AnyAsync(
-                user => user.Email == request.Email,
-                cancellationToken);
-
-            if (isEmailInUse)
-            {
-                return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Email)));
-            }
-
-            Role roleToAssign = Role.All.First(r => r.Name == request.Role);
-
-            var user = User.Create(
-                request.Email,
-                passwordHasher.Hash(request.Password),
-                request.FirstName,
-                request.LastName,
-                roleToAssign,
-                isEmailVerified: request.Verified ?? false,
-                emailVerificationToken: request.Verified ?? false ? null : Guid.NewGuid(),
-                emailVerificationTokenExpiresAt: request.Verified ?? false ? null : dateTimeProvider.UtcNow.AddDays(5));
-
-            foreach (Role role in user.Roles)
-            {
-                unitOfWork.Roles.Attach(role);
-            }
-
-            await unitOfWork.Users.AddAsync(user, cancellationToken);
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return user.Id;
+            return Result.Failure<Guid>(UserErrors.NotFound);
         }
+
+        user.Register(request.Username, passwordHasher.Hash(request.Password), request.FirstName, request.LastName, false, Guid.NewGuid(), dateTimeProvider.UtcNow.AddDays(5));
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return user.Id;
+    }
 }
