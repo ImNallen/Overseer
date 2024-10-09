@@ -1,0 +1,103 @@
+@page "/profile"
+
+@using Overseer.Web.Clients
+@using Overseer.Web.Models.Users
+
+@inject IUsersClient UsersClient
+@inject ToastService ToastService
+
+<PageTitle>Overseer - Profile</PageTitle>
+
+<div class="container mx-auto mt-8">
+    <h1 class="text-3xl font-bold mb-6">Profile</h1>
+
+    @if (profile == null)
+    {
+        <div class="flex justify-center items-center h-64">
+            <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-0 border-primary"></div>
+        </div>
+    }
+    else
+    {
+        <div class="bg-light-surface dark:bg-dark-surface shadow-md rounded-lg p-8">
+            <EditForm Model="@updateRequest" OnValidSubmit="@HandleValidSubmit">
+                <DataAnnotationsValidator />
+                <div class="flex items-center mb-8">
+                    <div class="w-24 h-24 shadow rounded bg-gradient-to-br from-accent to-primary flex items-center justify-center text-white text-3xl font-bold">
+                        @(profile.FirstName[0])@(profile.LastName[0])
+                    </div>
+                    <div class="ml-6">
+                        <h2 class="text-2xl font-semibold text-gray-900 dark:text-gray-100">@profile.FirstName @profile.LastName</h2>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">@profile.Email</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">ID</label>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-100 bg-light-foreground dark:bg-dark-foreground p-2 rounded shadow">@profile.Id</p>
+                    </div>
+                    <div class="col-span-1 md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-100 bg-light-foreground dark:bg-dark-foreground p-2 rounded shadow">@profile.Email</p>
+                    </div>
+                    <div class="col-span-1 md:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                        <p class="mt-1 text-sm text-gray-900 dark:text-gray-100 bg-light-foreground dark:bg-dark-foreground p-2 rounded shadow">@profile.Username</p>
+                    </div>
+                    <div class="col-span-1 md:col-span-1">
+                        <label for="firstName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">First Name</label>
+                        <InputText id="firstName" @bind-Value="updateRequest.FirstName" class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 bg-light-foreground dark:bg-dark-foreground p-2 rounded border-none shadow" />
+                        <ValidationMessage For="@(() => updateRequest.FirstName)" />
+                    </div>
+                    <div class="col-span-1 md:col-span-1">
+                        <label for="lastName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Last Name</label>
+                        <InputText id="lastName" @bind-Value="updateRequest.LastName" class="mt-1 block w-full text-sm text-gray-900 dark:text-gray-100 bg-light-foreground dark:bg-dark-foreground p-2 rounded border-none shadow" />
+                        <ValidationMessage For="@(() => updateRequest.LastName)" />
+                    </div>
+                </div>
+            </EditForm>
+            <div class="mt-8">
+                <button @onclick="HandleValidSubmit" class="bg-gradient-to-br from-accent to-primary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                    Update
+                </button>
+                <button class="bg-light-foreground dark:bg-dark-foreground shadow font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105">
+                    Change Password
+                </button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private ProfileResponse? profile;
+    private UpdateUserRequest updateRequest = new() { FirstName = string.Empty, LastName = string.Empty };
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            profile = await UsersClient.GetProfile();
+            updateRequest.FirstName = profile.FirstName;
+            updateRequest.LastName = profile.LastName;
+        }
+        catch (Exception ex)
+        {
+            await ToastService.Show("Error", "Failed to load profile", Toast.ToastType.Error);
+            Console.WriteLine(ex);
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        try
+        {
+            profile = await UsersClient.UpdateProfile(updateRequest);
+            await ToastService.Show("Success", "Profile updated successfully", Toast.ToastType.Success);
+        }
+        catch (Exception ex)
+        {
+            await ToastService.Show("Error", "Failed to update profile", Toast.ToastType.Error);
+            Console.WriteLine(ex);
+        }
+    }
+}

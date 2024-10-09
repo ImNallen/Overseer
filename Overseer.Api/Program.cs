@@ -1,5 +1,4 @@
 using System.Reflection;
-using Carter;
 using Overseer.Api;
 using Serilog;
 
@@ -12,18 +11,24 @@ builder.Services.AddServices(
     builder.Configuration,
     Assembly.GetExecutingAssembly());
 
+builder.Services.AddCors();
+
 WebApplication app = builder.Build();
+
+app.MapEndpoints();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Overseer API v1"));
+    app.UseSwaggerWithUi();
     app.ApplyMigrations();
 }
 
-app.UseHttpsRedirection();
+app.UseCors(b => b
+    .AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader());
 
-app.MapCarter();
+app.UseHttpsRedirection();
 
 app.UseExceptionHandler();
 

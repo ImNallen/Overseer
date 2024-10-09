@@ -18,7 +18,7 @@ module.exports = {
         'dark-background': '#121212',
         'light-surface': '#fafafa',
         'dark-surface': '#1E1E1E',
-        'light-foreground': '#fefefe',
+        'light-foreground': '#ffffff',
         'dark-foreground': '#2E2E2E',
         'primary': '#FF359A',
         'accent': '#B035FF',

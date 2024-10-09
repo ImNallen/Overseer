@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
+using Asp.Versioning.Builder;
+using Microsoft.EntityFrameworkCore;
+using Overseer.Api.Features;
 using Overseer.Api.Persistence;
 
 namespace Overseer.Api;
@@ -14,4 +18,55 @@ public static class Extensions
 
         dbContext.Database.Migrate();
     }
+
+    public static IApplicationBuilder UseSwaggerWithUi(this WebApplication app)
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI(options =>
+        {
+            options.DefaultModelsExpandDepth(-1);
+
+            IReadOnlyList<ApiVersionDescription> descriptions =
+                app.DescribeApiVersions();
+
+            descriptions
+                .Select(d => d.GroupName)
+                .ToList()
+                .ForEach(groupName =>
+                {
+                    string url = $"/swagger/{groupName}/swagger.json";
+                    string name = groupName.ToUpperInvariant();
+
+                    options.SwaggerEndpoint(url, name);
+                });
+        });
+
+        return app;
+    }
+
+    public static IApplicationBuilder MapEndpoints(
+        this WebApplication app)
+    {
+        ApiVersionSet apiVersionSet = app.NewApiVersionSet()
+            .HasApiVersion(new ApiVersion(1))
+            .ReportApiVersions()
+            .Build();
+
+        RouteGroupBuilder? versionedGroupBuilder = app
+            .MapGroup("api/v{version:apiVersion}")
+            .WithApiVersionSet(apiVersionSet);
+
+        IEnumerable<IEndpoint> endpoints = app.Services.GetRequiredService<IEnumerable<IEndpoint>>();
+
+        IEndpointRouteBuilder builder = versionedGroupBuilder;
+
+        foreach (IEndpoint endpoint in endpoints)
+        {
+            endpoint.MapEndpoint(builder);
+        }
+
+        return app;
+    }
+
+    public static RouteHandlerBuilder HasPermission(this RouteHandlerBuilder app, string permission) => app.RequireAuthorization(permission);
 }

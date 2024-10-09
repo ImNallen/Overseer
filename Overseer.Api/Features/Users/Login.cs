@@ -1,4 +1,3 @@
-using Carter;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -19,9 +18,9 @@ public record TokenResponse(string AccessToken, int ExpiresIn, string RefreshTok
 
 public record LoginCommand(string Username, string Password) : ICommand<Token>;
 
-public class LoginEndpoint : ICarterModule
+public class LoginEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapPost("/users/login", async (
             LoginRequest request,
             ISender sender,
@@ -68,7 +67,7 @@ public class LoginHandler(
     public async Task<Result<Token>> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         User? user = await unitOfWork.Users
-            .Where(x => x.Username == request.Username)
+            .Where(x => (string)x.Username == request.Username)
             .Include(x => x.Roles)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -94,7 +93,14 @@ public class LoginHandler(
 
         Token token = jwtTokenGenerator.GenerateToken(user);
 
-        user.SetRefreshToken(token.RefreshToken, dateTimeProvider.UtcNow.AddMinutes(token.RefreshExpiresIn));
+        Result<RefreshToken> refreshTokenResult = RefreshToken.Create(token.RefreshToken);
+
+        if (refreshTokenResult.IsFailure)
+        {
+            return Result.Failure<Token>(refreshTokenResult.Error);
+        }
+
+        user.SetRefreshToken(refreshTokenResult.Value, dateTimeProvider.UtcNow.AddMinutes(token.RefreshExpiresIn));
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

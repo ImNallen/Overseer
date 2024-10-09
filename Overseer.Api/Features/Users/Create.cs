@@ -1,4 +1,3 @@
-using Carter;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,7 @@ using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
-using Overseer.Api.Features.Organisations.Entities;
+using Overseer.Api.Features.Shared;
 using Overseer.Api.Features.Users.Entities;
 
 namespace Overseer.Api.Features.Users;
@@ -22,6 +21,8 @@ public record CreateUserRequest(
     string LastName,
     string Role);
 
+public record CreateUserResponse(Guid Id);
+
 public record CreateUserCommand(
     string Email,
     string Username,
@@ -31,9 +32,9 @@ public record CreateUserCommand(
     string Role,
     bool? Verified = false) : ICommand<Guid>;
 
-public class CreateUserEndpoint : ICarterModule
+public class CreateUserEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapPost("/users", async (
                 CreateUserRequest request,
                 [FromQuery] bool? verified,
@@ -56,10 +57,10 @@ public class CreateUserEndpoint : ICarterModule
                     return CustomResults.Problem(result);
                 }
 
-                return Results.Ok(result.Value);
+                return Results.Ok(new CreateUserResponse(result.Value));
             })
             .WithTags(Tags.Users)
-            .RequireAuthorization(Permissions.Admin);
+            .AllowAnonymous();
 }
 
 public class CreateUserValidator : AbstractValidator<CreateUserCommand>
@@ -68,26 +69,28 @@ public class CreateUserValidator : AbstractValidator<CreateUserCommand>
     {
         RuleFor(x => x.Email)
             .NotEmpty()
-            .EmailAddress();
+            .EmailAddress()
+            .MaximumLength(Email.MaxLength);
 
         RuleFor(x => x.Username)
             .NotEmpty()
-            .MinimumLength(3)
-            .MaximumLength(50);
+            .MinimumLength(Username.MinLength)
+            .MaximumLength(Username.MaxLength);
 
         RuleFor(x => x.Password)
-            .NotEmpty();
+            .NotEmpty()
+            .MinimumLength(Password.MinLength)
+            .MaximumLength(Password.MaxLength);
 
         RuleFor(x => x.FirstName)
+            .MinimumLength(FirstName.MinLength)
+            .MaximumLength(FirstName.MaxLength)
             .NotEmpty();
 
         RuleFor(x => x.LastName)
+            .MinimumLength(LastName.MinLength)
+            .MaximumLength(LastName.MaxLength)
             .NotEmpty();
-
-        RuleFor(x => x.Role)
-            .NotEmpty()
-            .Must(x => Role.All.Exists(r => r.Name == x))
-            .WithMessage("Invalid role");
     }
 }
 
@@ -100,20 +103,45 @@ public class CreateUserHandler(
     public async Task<Result<Guid>> Handle(
         CreateUserCommand request,
         CancellationToken cancellationToken)
-        {
-            Organisation? organisation = await unitOfWork.Organisations.FirstOrDefaultAsync(cancellationToken);
+    {
+            Result<Email> emailResult = Email.Create(request.Email);
+            Result<Username> usernameResult = Username.Create(request.Username);
+            string hashedPassword = passwordHasher.Hash(request.Password);
+            Result<Password> passwordResult = Password.Create(hashedPassword);
+            Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+            Result<LastName> lastNameResult = LastName.Create(request.LastName);
 
-            if (organisation is null)
+            if (emailResult.IsFailure)
             {
-                return Result.Failure<Guid>(OrganisationErrors.NotFound);
+                return Result.Failure<Guid>(emailResult.Error);
+            }
+
+            if (usernameResult.IsFailure)
+            {
+                return Result.Failure<Guid>(usernameResult.Error);
+            }
+
+            if (passwordResult.IsFailure)
+            {
+                return Result.Failure<Guid>(passwordResult.Error);
+            }
+
+            if (firstNameResult.IsFailure)
+            {
+                return Result.Failure<Guid>(firstNameResult.Error);
+            }
+
+            if (lastNameResult.IsFailure)
+            {
+                return Result.Failure<Guid>(lastNameResult.Error);
             }
 
             bool isEmailInUse = await unitOfWork.Users.AnyAsync(
-                user => user.Email == request.Email,
+                user => (string)user.Email == request.Email,
                 cancellationToken);
 
             bool isUsernameInUse = await unitOfWork.Users.AnyAsync(
-                user => user.Username == request.Username,
+                user => (string)user.Username == request.Username,
                 cancellationToken);
 
             if (isEmailInUse)
@@ -126,19 +154,22 @@ public class CreateUserHandler(
                 return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Username)));
             }
 
-            Role roleToAssign = Role.All.First(r => r.Name == request.Role);
+            Role roleToAssign = Role.All.Select(role => role.Name).Contains(request.Role)
+                ? Role.All.First(role => role.Name == request.Role)
+                : Role.User;
 
-            var user = User.Create(
-                request.Email,
-                request.Username,
-                passwordHasher.Hash(request.Password),
-                request.FirstName,
-                request.LastName,
-                organisation.Id,
-                roleToAssign,
-                isEmailVerified: request.Verified ?? false,
-                emailVerificationToken: request.Verified ?? false ? null : Guid.NewGuid(),
-                emailVerificationTokenExpiresAt: request.Verified ?? false ? null : dateTimeProvider.UtcNow.AddDays(5));
+            User user = UserBuilder
+                .Empty()
+                .WithEmail(emailResult.Value)
+                .WithUsername(usernameResult.Value)
+                .WithPassword(passwordResult.Value)
+                .WithName(firstNameResult.Value, lastNameResult.Value)
+                .WithRole(roleToAssign)
+                .Verified(request.Verified ?? false)
+                .RequireEmailVerification(
+                    request.Verified ?? false ? null : Guid.NewGuid(),
+                    request.Verified ?? false ? DateTime.MinValue : dateTimeProvider.UtcNow.AddDays(5))
+                .Build(dateTimeProvider.UtcNow);
 
             foreach (Role role in user.Roles)
             {

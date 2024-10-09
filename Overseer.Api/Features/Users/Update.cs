@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Carter;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +6,7 @@ using Overseer.Api.Abstractions.Exceptions;
 using Overseer.Api.Abstractions.Messaging;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
+using Overseer.Api.Features.Shared;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Authentication;
 
@@ -14,13 +14,13 @@ namespace Overseer.Api.Features.Users;
 
 public record UpdateUserRequest(string FirstName, string LastName);
 
-public record UpdateUserResponse(Guid Id, string Email, string FirstName, string LastName);
+public record UpdateUserResponse(Guid Id, string Email, string Username, string FirstName, string LastName);
 
 public record UpdateUserCommand(Guid UserId, string FirstName, string LastName) : ICommand<User>;
 
-public class UpdateUserEndpoint : ICarterModule
+public class UpdateUserEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapPut("/users/profile", async (
             UpdateUserRequest request,
             ClaimsPrincipal claims,
@@ -31,7 +31,7 @@ public class UpdateUserEndpoint : ICarterModule
 
             Result<User> result = await sender.Send(command, cancellationToken);
 
-            return result.IsFailure ? CustomResults.Problem(result) : Results.Ok(new UpdateUserResponse(result.Value.Id, result.Value.Email, result.Value.FirstName!, result.Value.LastName!));
+            return result.IsFailure ? CustomResults.Problem(result) : Results.Ok(new UpdateUserResponse(result.Value.Id, result.Value.Email.Value, result.Value.Username.Value, result.Value.FirstName.Value, result.Value.LastName.Value));
         })
         .WithTags(Tags.Users)
         .RequireAuthorization(Permissions.UsersWrite);
@@ -41,8 +41,15 @@ public class UpdateUserValidator : AbstractValidator<UpdateUserCommand>
 {
     public UpdateUserValidator()
     {
-        RuleFor(x => x.FirstName).NotEmpty();
-        RuleFor(x => x.LastName).NotEmpty();
+        RuleFor(x => x.FirstName)
+            .NotEmpty()
+            .MinimumLength(FirstName.MinLength)
+            .MaximumLength(FirstName.MaxLength);
+
+        RuleFor(x => x.LastName)
+            .NotEmpty()
+            .MinimumLength(LastName.MinLength)
+            .MaximumLength(LastName.MaxLength);
     }
 }
 
@@ -66,7 +73,20 @@ public class UpdateUserHandler(
             return Result.Failure<User>(UserErrors.NotVerified);
         }
 
-        user.Update(request.FirstName, request.LastName);
+        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+        Result<LastName> lastNameResult = LastName.Create(request.LastName);
+
+        if (firstNameResult.IsFailure)
+        {
+            return Result.Failure<User>(firstNameResult.Error);
+        }
+
+        if (lastNameResult.IsFailure)
+        {
+            return Result.Failure<User>(lastNameResult.Error);
+        }
+
+        user.Update(firstNameResult.Value, lastNameResult.Value);
 
         await unitOfWork.SaveChangesAsync(cancellationToken);
 

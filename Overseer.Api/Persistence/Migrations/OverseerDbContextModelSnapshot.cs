@@ -23,7 +23,7 @@ namespace Overseer.Api.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Overseer.Api.Features.Organisations.Entities.Organisation", b =>
+            modelBuilder.Entity("Overseer.Api.Features.Customers.Entities.Customer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -32,43 +32,30 @@ namespace Overseer.Api.Persistence.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("Email");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("FirstName");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("LastName");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Organisations", "public");
-                });
+                    b.HasIndex("Email")
+                        .IsUnique();
 
-            modelBuilder.Entity("Overseer.Api.Features.Products.Entities.Product", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("numeric");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Products", "public");
+                    b.ToTable("Customers", "public");
                 });
 
             modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>
@@ -102,6 +89,21 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             Id = 3,
                             Name = "users:delete"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "admin"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "customers:read"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "customers:write"
                         });
                 });
 
@@ -171,6 +173,16 @@ namespace Overseer.Api.Persistence.Migrations
                         },
                         new
                         {
+                            RoleId = 1,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 1,
+                            PermissionId = 6
+                        },
+                        new
+                        {
                             RoleId = 2,
                             PermissionId = 1
                         },
@@ -183,6 +195,16 @@ namespace Overseer.Api.Persistence.Migrations
                         {
                             RoleId = 2,
                             PermissionId = 3
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 5
+                        },
+                        new
+                        {
+                            RoleId = 2,
+                            PermissionId = 6
                         });
                 });
 
@@ -192,10 +214,14 @@ namespace Overseer.Api.Persistence.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("Email");
 
                     b.Property<Guid?>("EmailVerificationToken")
                         .HasColumnType("uuid");
@@ -204,25 +230,25 @@ namespace Overseer.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FirstName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid?>("InviteToken")
-                        .HasColumnType("uuid");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("FirstName");
 
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<Guid>("OrganisationId")
-                        .HasColumnType("uuid");
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("LastName");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("Password");
 
                     b.Property<Guid?>("PasswordResetToken")
                         .HasColumnType("uuid");
@@ -231,7 +257,9 @@ namespace Overseer.Api.Persistence.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("RefreshToken")
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("RefreshToken");
 
                     b.Property<DateTime?>("RefreshTokenExpires")
                         .HasColumnType("timestamp with time zone");
@@ -241,8 +269,10 @@ namespace Overseer.Api.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("Username");
 
                     b.HasKey("Id");
 
@@ -251,11 +281,6 @@ namespace Overseer.Api.Persistence.Migrations
 
                     b.HasIndex("EmailVerificationToken")
                         .IsUnique();
-
-                    b.HasIndex("InviteToken")
-                        .IsUnique();
-
-                    b.HasIndex("OrganisationId");
 
                     b.HasIndex("PasswordResetToken")
                         .IsUnique();
@@ -313,6 +338,41 @@ namespace Overseer.Api.Persistence.Migrations
                     b.ToTable("RoleUser", "public");
                 });
 
+            modelBuilder.Entity("Overseer.Api.Features.Customers.Entities.Customer", b =>
+                {
+                    b.OwnsOne("Overseer.Api.Features.Shared.Address", "Address", b1 =>
+                        {
+                            b1.Property<Guid>("CustomerId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ZipCode")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("CustomerId");
+
+                            b1.ToTable("Customers", "public");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CustomerId");
+                        });
+
+                    b.Navigation("Address")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Overseer.Api.Features.Users.Entities.RolePermission", b =>
                 {
                     b.HasOne("Overseer.Api.Features.Users.Entities.Permission", "Permission")
@@ -332,17 +392,6 @@ namespace Overseer.Api.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("Overseer.Api.Features.Users.Entities.User", b =>
-                {
-                    b.HasOne("Overseer.Api.Features.Organisations.Entities.Organisation", "Organisation")
-                        .WithMany("Users")
-                        .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Organisation");
-                });
-
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.HasOne("Overseer.Api.Features.Users.Entities.Role", null)
@@ -356,11 +405,6 @@ namespace Overseer.Api.Persistence.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Overseer.Api.Features.Organisations.Entities.Organisation", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("Overseer.Api.Features.Users.Entities.Permission", b =>

@@ -18,4 +18,16 @@ public static class UserErrors
 
     public static Error NotUnique(string name) =>
         Error.Conflict("Users.NotUnique", $"Provided {name} is not unique.");
+
+    public static Error Empty(string name) =>
+        Error.Problem("Users.Empty", $"Provided {name} is empty.");
+
+    public static Error TooShort(string name, int length) =>
+        Error.Problem("Users.TooShort", $"Provided {name} is too short. It must be at least {length} characters long.");
+
+    public static Error TooLong(string name, int length) =>
+        Error.Problem("Users.TooLong", $"Provided {name} is too long. It must be at most {length} characters long.");
+
+    public static Error InvalidFormat(string name) =>
+        Error.Problem("Users.InvalidFormat", $"Provided {name} is invalid.");
 }

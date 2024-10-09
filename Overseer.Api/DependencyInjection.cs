@@ -1,19 +1,21 @@
 ﻿using System.Reflection;
 using System.Text;
-using Carter;
+using Asp.Versioning;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using Npgsql;
 using Overseer.Api.Abstractions.Behaviors;
 using Overseer.Api.Abstractions.Encryption;
 using Overseer.Api.Abstractions.Exceptions;
+using Overseer.Api.Abstractions.Options;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Abstractions.Time;
+using Overseer.Api.Features;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Persistence;
 using Overseer.Api.Services.Authentication;
@@ -35,10 +37,10 @@ public static class DependencyInjection
             .AddDatabase(configuration)
             .AddMediator()
             .AddFluentValidation(assembly)
+            .AddEndpoints(assembly)
             .AddSwagger()
             .AddHandlers()
             .AddServices()
-            .AddCarter()
             .SetupQuartz(configuration)
             .AddEmail(configuration)
             .AddAuth(configuration);
@@ -62,10 +64,20 @@ public static class DependencyInjection
     {
         services.AddEndpointsApiExplorer();
 
+        services.AddApiVersioning(options =>
+        {
+            options.DefaultApiVersion = new ApiVersion(1);
+            options.ApiVersionReader = new UrlSegmentApiVersionReader();
+        }).AddApiExplorer(options =>
+        {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
+        });
+
+        services.ConfigureOptions<ConfigureSwaggerGenOptions>();
+
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc("v1", new OpenApiInfo { Title = "Overseer API", Version = "v1" });
-
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
                 Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
@@ -189,6 +201,20 @@ public static class DependencyInjection
         services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
         services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddEndpoints(this IServiceCollection services, Assembly assembly)
+    {
+        ServiceDescriptor[] serviceDescriptors = assembly
+            .DefinedTypes
+            .Where(type => type is { IsAbstract: false, IsInterface: false } &&
+                           type.IsAssignableTo(typeof(IEndpoint)))
+            .Select(type => ServiceDescriptor.Transient(typeof(IEndpoint), type))
+            .ToArray();
+
+        services.TryAddEnumerable(serviceDescriptors);
 
         return services;
     }

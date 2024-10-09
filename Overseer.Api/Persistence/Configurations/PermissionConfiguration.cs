@@ -20,6 +20,9 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
         builder.HasData(
             Permission.UsersRead,
             Permission.UsersWrite,
-            Permission.UsersDelete);
+            Permission.UsersDelete,
+            Permission.Admin,
+            Permission.CustomersRead,
+            Permission.CustomersWrite);
     }
 }

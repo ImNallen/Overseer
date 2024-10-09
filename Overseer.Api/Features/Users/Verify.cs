@@ -1,4 +1,3 @@
-using Carter;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,9 +11,9 @@ namespace Overseer.Api.Features.Users;
 
 public record VerifyCommand(Guid Token) : ICommand;
 
-public class VerifyEndpoint : ICarterModule
+public class VerifyEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapGet("/users/verify", async (
             Guid token,
             ISender sender,

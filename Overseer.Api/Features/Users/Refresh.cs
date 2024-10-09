@@ -1,4 +1,3 @@
-using Carter;
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +17,9 @@ public record RefreshResponse(string AccessToken, int ExpiresIn, string RefreshT
 
 public record RefreshCommand(string RefreshToken) : ICommand<RefreshResponse>;
 
-public class RefreshEndpoint : ICarterModule
+public class RefreshEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapPost("/users/refresh", async (
             RefreshRequest request,
             ISender sender,
@@ -60,7 +59,7 @@ public class RefreshHandler : ICommandHandler<RefreshCommand, RefreshResponse>
     public async Task<Result<RefreshResponse>> Handle(RefreshCommand request, CancellationToken cancellationToken)
     {
         User? user = await _unitOfWork.Users
-            .Where(u => u.RefreshToken == request.RefreshToken)
+            .Where(u => u.RefreshToken != null && (string)u.RefreshToken == request.RefreshToken)
             .Include(u => u.Roles)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -76,7 +75,14 @@ public class RefreshHandler : ICommandHandler<RefreshCommand, RefreshResponse>
 
         Token token = _jwtTokenGenerator.GenerateToken(user);
 
-        user.SetRefreshToken(token.RefreshToken, _dateTimeProvider.UtcNow.AddMinutes(token.RefreshExpiresIn));
+        Result<RefreshToken> refreshTokenResult = RefreshToken.Create(token.RefreshToken);
+
+        if (refreshTokenResult.IsFailure)
+        {
+            return Result.Failure<RefreshResponse>(refreshTokenResult.Error);
+        }
+
+        user.SetRefreshToken(refreshTokenResult.Value, _dateTimeProvider.UtcNow.AddMinutes(token.RefreshExpiresIn));
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Overseer.Api.Features.Shared;
 using Overseer.Api.Features.Users;
 using Overseer.Api.Features.Users.Entities;
 
@@ -12,20 +13,51 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(u => u.Id);
 
         builder.Property(u => u.Email)
-            .HasMaxLength(255)
+            .HasConversion(
+                e => e.Value,
+                v => Email.Create(v).Value)
+            .HasColumnName(nameof(Email))
+            .HasMaxLength(Email.MaxLength)
             .IsRequired();
 
         builder.Property(u => u.Username)
-            .HasMaxLength(50);
+            .HasConversion(
+                e => e.Value,
+                v => Username.Create(v).Value)
+            .HasColumnName(nameof(Username))
+            .HasMaxLength(Username.MaxLength)
+            .IsRequired();
 
         builder.Property(u => u.Password)
-            .HasMaxLength(255);
+            .HasConversion(
+                p => p.Value,
+                v => Password.Create(v).Value)
+            .HasColumnName(nameof(Password))
+            .HasMaxLength(Password.MaxLength)
+            .IsRequired();
 
         builder.Property(u => u.FirstName)
-            .HasMaxLength(50);
+            .HasConversion(
+                e => e.Value,
+                v => FirstName.Create(v).Value)
+            .HasColumnName(nameof(FirstName))
+            .HasMaxLength(FirstName.MaxLength)
+            .IsRequired();
 
         builder.Property(u => u.LastName)
-            .HasMaxLength(50);
+            .HasConversion(
+                e => e.Value,
+                v => LastName.Create(v).Value)
+            .HasColumnName(nameof(LastName))
+            .HasMaxLength(LastName.MaxLength)
+            .IsRequired();
+
+        builder.Property(u => u.RefreshToken)
+            .HasConversion(
+                e => e!.Value,
+                v => RefreshToken.Create(v).Value)
+            .HasColumnName(nameof(RefreshToken))
+            .HasMaxLength(100);
 
         builder.Property(u => u.Status)
             .IsRequired()
@@ -37,9 +69,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasIndex(u => u.Username)
             .IsUnique();
 
-        builder.HasIndex(u => u.InviteToken)
-            .IsUnique();
-
         builder.HasIndex(u => u.PasswordResetToken)
             .IsUnique();
 
@@ -48,9 +77,5 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(u => u.EmailVerificationToken)
             .IsUnique();
-
-        builder.HasOne(u => u.Organisation)
-            .WithMany(o => o.Users)
-            .HasForeignKey(u => u.OrganisationId);
     }
 }

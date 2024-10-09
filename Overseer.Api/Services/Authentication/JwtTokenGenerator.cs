@@ -53,11 +53,11 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         Claim[] claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Email, user.Email),
-            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username!),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email.Value),
+            new Claim(JwtRegisteredClaimNames.UniqueName, user.Username.Value),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName!),
-            new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName!),
+            new Claim(JwtRegisteredClaimNames.GivenName, user.FirstName.Value),
+            new Claim(JwtRegisteredClaimNames.FamilyName, user.LastName.Value),
         };
 
         IEnumerable<Claim> rolesClaims = user.Roles.Select(role => new Claim(ClaimTypes.Role, role.Name));

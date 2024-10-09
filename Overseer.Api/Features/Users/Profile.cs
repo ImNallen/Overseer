@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Carter;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Overseer.Api.Abstractions.Exceptions;
@@ -13,11 +12,11 @@ namespace Overseer.Api.Features.Users;
 
 public record ProfileQuery(Guid UserId) : IQuery<User>;
 
-public record ProfileResponse(string Email, string FirstName, string LastName);
+public record ProfileResponse(Guid Id, string Email, string Username, string FirstName, string LastName);
 
-public class ProfileEndpoint : ICarterModule
+public class ProfileEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapGet("/users/profile", async (
             ClaimsPrincipal claims,
             ISender sender,
@@ -32,7 +31,13 @@ public class ProfileEndpoint : ICarterModule
                 return CustomResults.Problem(result);
             }
 
-            return Results.Ok(new ProfileResponse(result.Value.Email, result.Value.FirstName!, result.Value.LastName!));
+            return Results.Ok(
+                new ProfileResponse(
+                    result.Value.Id,
+                    result.Value.Email.Value,
+                    result.Value.Username.Value,
+                    result.Value.FirstName.Value,
+                    result.Value.LastName.Value));
         })
         .WithTags(Tags.Users)
         .RequireAuthorization(Permissions.UsersRead);

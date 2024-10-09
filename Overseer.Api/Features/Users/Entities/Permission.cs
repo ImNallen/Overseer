@@ -10,6 +10,10 @@ public class Permission
 
     public static readonly Permission Admin = new(4, "admin");
 
+    public static readonly Permission CustomersRead = new(5, "customers:read");
+
+    public static readonly Permission CustomersWrite = new(6, "customers:write");
+
     public Permission(int id, string name)
     {
         Id = id;

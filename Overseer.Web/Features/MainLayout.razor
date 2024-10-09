@@ -1,7 +1,5 @@
 ﻿@inherits LayoutComponentBase
 
-@inject ToastService ToastService;
-
 <div class="h-screen bg-light-background dark:bg-dark-background text-black dark:text-white flex flex-col p-4 sm:p-0">
     <Navbar />
 
@@ -9,13 +7,3 @@
         @Body
     </main>
 </div>
-
-@code {
-    protected override async Task OnInitializedAsync()
-    {
-        await ToastService.Show("Success", "This is a success message", Toast.ToastType.Success);
-        await ToastService.Show("Info", "This is an info message", Toast.ToastType.Info);
-        await ToastService.Show("Warning", "This is a warning message", Toast.ToastType.Warning);
-        await ToastService.Show("Error", "This is an error message", Toast.ToastType.Error);
-    }
-}

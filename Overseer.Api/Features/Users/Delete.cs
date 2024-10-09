@@ -1,4 +1,3 @@
-using Carter;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Overseer.Api.Abstractions.Exceptions;
@@ -11,9 +10,9 @@ namespace Overseer.Api.Features.Users;
 
 public record DeleteUserCommand(Guid Id) : ICommand;
 
-public class DeleteUserEndpoint : ICarterModule
+public class DeleteUserEndpoint : IEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app) =>
+    public void MapEndpoint(IEndpointRouteBuilder app) =>
         app.MapDelete("/users/{id}", async (
             Guid id,
             ISender sender,

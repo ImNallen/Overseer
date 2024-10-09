@@ -10,7 +10,7 @@ public static class Permissions
 
     public const string UsersDelete = "users:delete";
 
-    public const string ProductsRead = "products:read";
+    public const string CustomersRead = "customers:read";
 
-    public const string ProductsWrite = "products:write";
+    public const string CustomersWrite = "customers:write";
 }

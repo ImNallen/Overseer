@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Overseer.Api.Features.Organisations.Entities;
-using Overseer.Api.Features.Products.Entities;
+using Overseer.Api.Features.Customers.Entities;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
 
@@ -12,9 +11,11 @@ public interface IUnitOfWork
 
     DbSet<Role> Roles { get; }
 
-    DbSet<Product> Products { get; }
+    DbSet<Permission> Permissions { get; }
 
-    DbSet<Organisation> Organisations { get; }
+    DbSet<RolePermission> RolePermissions { get; }
+
+    DbSet<Customer> Customers { get; }
 
     DbSet<OutboxMessage> OutboxMessages { get; }
 

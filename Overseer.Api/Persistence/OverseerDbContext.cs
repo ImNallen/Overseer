@@ -1,10 +1,8 @@
-﻿using MediatR;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
-using Overseer.Api.Features.Organisations.Entities;
-using Overseer.Api.Features.Products.Entities;
+using Overseer.Api.Features.Customers.Entities;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Serialization;
@@ -16,17 +14,15 @@ public class OverseerDbContext(
 {
     public DbSet<User> Users => Set<User>();
 
-    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Customer> Customers => Set<Customer>();
 
-    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Role> Roles => Set<Role>();
 
     public DbSet<Permission> Permissions => Set<Permission>();
 
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
 
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
-
-    public DbSet<Organisation> Organisations => Set<Organisation>();
 
     public override async Task<int> SaveChangesAsync(
         CancellationToken cancellationToken = default)
