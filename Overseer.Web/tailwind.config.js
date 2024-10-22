@@ -14,14 +14,10 @@ module.exports = {
     },
     extend: {
       colors: {
-        'light-background': '#F4F3F2',
-        'dark-background': '#121212',
-        'light-surface': '#fafafa',
-        'dark-surface': '#1E1E1E',
-        'light-foreground': '#ffffff',
-        'dark-foreground': '#2E2E2E',
-        'primary': '#FF359A',
-        'accent': '#B035FF',
+        'background': '#121212',
+        'surface': '#171717',
+        'foreground': '#212121',
+        'highlight': '#313131',
       },
     },
   }

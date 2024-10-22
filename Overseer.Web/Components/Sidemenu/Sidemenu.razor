@@ -1,0 +1,16 @@
+<div class="h-screen border-r border-highlight bg-surface w-72">
+    <p class="text-white text-md font-bold px-4 h-10 border-b border-highlight flex items-center">@Title</p>
+    
+    @if (ChildContent != null)
+    {
+        @ChildContent
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; } = string.Empty;
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}

@@ -1,13 +1,12 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Overseer.Api.Abstractions.Exceptions;
-using Overseer.Api.Abstractions.Messaging;
-using Overseer.Api.Abstractions.Persistence;
-using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Customers.Entities;
 using Overseer.Api.Features.Shared;
+using Overseer.Api.Persistence;
+using Overseer.Api.Services.Time;
+using Overseer.Api.Utilities.Exceptions;
 
 namespace Overseer.Api.Features.Customers;
 
@@ -109,7 +108,8 @@ public class CreateCustomerHandler(
 
         var address = new Address(request.Address, request.City, request.State, request.ZipCode);
 
-        Customer customer = CustomerBuilder.Empty()
+        Customer customer = CustomerBuilder
+            .Empty()
             .WithEmail(emailResult.Value)
             .WithName(firstNameResult.Value, lastNameResult.Value)
             .WithAddress(address)

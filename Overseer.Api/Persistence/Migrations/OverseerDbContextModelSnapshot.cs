@@ -291,6 +291,11 @@ namespace Overseer.Api.Persistence.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
+                    b.HasIndex("Email", "Username", "FirstName", "LastName")
+                        .HasAnnotation("Npgsql:TsVectorConfig", "english");
+
+                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Email", "Username", "FirstName", "LastName"), "GIN");
+
                     b.ToTable("Users", "public");
                 });
 

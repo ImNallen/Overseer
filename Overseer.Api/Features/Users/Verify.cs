@@ -1,11 +1,10 @@
 using FluentValidation;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Overseer.Api.Abstractions.Exceptions;
-using Overseer.Api.Abstractions.Messaging;
-using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Users.Entities;
+using Overseer.Api.Persistence;
+using Overseer.Api.Utilities.Exceptions;
 
 namespace Overseer.Api.Features.Users;
 

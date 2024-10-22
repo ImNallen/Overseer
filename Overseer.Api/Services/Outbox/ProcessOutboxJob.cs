@@ -2,10 +2,10 @@ using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using Overseer.Api.Abstractions.Persistence;
-using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
-using Overseer.Api.Services.Serialization;
+using Overseer.Api.Persistence;
+using Overseer.Api.Services.Time;
+using Overseer.Api.Utilities.Serialization;
 using Quartz;
 
 namespace Overseer.Api.Services.Outbox;

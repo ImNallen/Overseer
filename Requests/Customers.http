@@ -1,0 +1,15 @@
+### Create
+POST http://localhost:5000/api/v1/customers
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmNiZjYzOS1kMDNhLTQzNDgtOGU4YS0xNzNhNTUwOGVmMTUiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ1bmlxdWVfbmFtZSI6InRlc3QxMjM0NSIsImp0aSI6IjhiNGJlODNjLWRhYmEtNGM5Zi1hNzVkLTE1M2E1MjAxOGFmYSIsImdpdmVuX25hbWUiOiJ0ZXN0MiIsImZhbWlseV9uYW1lIjoidGVzdDIiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzI5MDg4OTYxLCJpc3MiOiJPdmVyc2VlciIsImF1ZCI6Ik92ZXJzZWVyIn0.EvL7rN7YOXMovJGQIWRH7YAun6MvaFfGSB9F9y5JqSc
+
+{
+    "email": "test@test.se",
+    "firstName": "test",
+    "lastName": "test",
+    "address": "test",
+    "city": "test",
+    "state": "test",
+    "zipCode": "test"
+}
+

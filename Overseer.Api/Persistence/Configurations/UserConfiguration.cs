@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Overseer.Api.Features.Shared;
 using Overseer.Api.Features.Users;
@@ -77,5 +78,9 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasIndex(u => u.EmailVerificationToken)
             .IsUnique();
+
+        builder.HasIndex(u => new { u.Email, u.Username, u.FirstName, u.LastName })
+            .HasMethod("GIN")
+            .IsTsVectorExpressionIndex("english");
     }
 }

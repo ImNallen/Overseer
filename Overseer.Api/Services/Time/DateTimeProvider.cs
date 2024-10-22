@@ -1,6 +1,4 @@
-﻿using Overseer.Api.Abstractions.Time;
-
-namespace Overseer.Api.Services.Time;
+﻿namespace Overseer.Api.Services.Time;
 
 internal sealed class DateTimeProvider : IDateTimeProvider
 {

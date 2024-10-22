@@ -2,14 +2,13 @@ using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Overseer.Api.Abstractions.Encryption;
-using Overseer.Api.Abstractions.Exceptions;
-using Overseer.Api.Abstractions.Messaging;
-using Overseer.Api.Abstractions.Persistence;
-using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Shared;
 using Overseer.Api.Features.Users.Entities;
+using Overseer.Api.Persistence;
+using Overseer.Api.Services.Encryption;
+using Overseer.Api.Services.Time;
+using Overseer.Api.Utilities.Exceptions;
 
 namespace Overseer.Api.Features.Users;
 
@@ -104,82 +103,82 @@ public class CreateUserHandler(
         CreateUserCommand request,
         CancellationToken cancellationToken)
     {
-            Result<Email> emailResult = Email.Create(request.Email);
-            Result<Username> usernameResult = Username.Create(request.Username);
-            string hashedPassword = passwordHasher.Hash(request.Password);
-            Result<Password> passwordResult = Password.Create(hashedPassword);
-            Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
-            Result<LastName> lastNameResult = LastName.Create(request.LastName);
+        Result<Email> emailResult = Email.Create(request.Email);
+        Result<Username> usernameResult = Username.Create(request.Username);
+        string hashedPassword = passwordHasher.Hash(request.Password);
+        Result<Password> passwordResult = Password.Create(hashedPassword);
+        Result<FirstName> firstNameResult = FirstName.Create(request.FirstName);
+        Result<LastName> lastNameResult = LastName.Create(request.LastName);
 
-            if (emailResult.IsFailure)
-            {
-                return Result.Failure<Guid>(emailResult.Error);
-            }
-
-            if (usernameResult.IsFailure)
-            {
-                return Result.Failure<Guid>(usernameResult.Error);
-            }
-
-            if (passwordResult.IsFailure)
-            {
-                return Result.Failure<Guid>(passwordResult.Error);
-            }
-
-            if (firstNameResult.IsFailure)
-            {
-                return Result.Failure<Guid>(firstNameResult.Error);
-            }
-
-            if (lastNameResult.IsFailure)
-            {
-                return Result.Failure<Guid>(lastNameResult.Error);
-            }
-
-            bool isEmailInUse = await unitOfWork.Users.AnyAsync(
-                user => (string)user.Email == request.Email,
-                cancellationToken);
-
-            bool isUsernameInUse = await unitOfWork.Users.AnyAsync(
-                user => (string)user.Username == request.Username,
-                cancellationToken);
-
-            if (isEmailInUse)
-            {
-                return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Email)));
-            }
-
-            if (isUsernameInUse)
-            {
-                return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Username)));
-            }
-
-            Role roleToAssign = Role.All.Select(role => role.Name).Contains(request.Role)
-                ? Role.All.First(role => role.Name == request.Role)
-                : Role.User;
-
-            User user = UserBuilder
-                .Empty()
-                .WithEmail(emailResult.Value)
-                .WithUsername(usernameResult.Value)
-                .WithPassword(passwordResult.Value)
-                .WithName(firstNameResult.Value, lastNameResult.Value)
-                .WithRole(roleToAssign)
-                .Verified(request.Verified ?? false)
-                .RequireEmailVerification(
-                    request.Verified ?? false ? null : Guid.NewGuid(),
-                    request.Verified ?? false ? DateTime.MinValue : dateTimeProvider.UtcNow.AddDays(5))
-                .Build(dateTimeProvider.UtcNow);
-
-            foreach (Role role in user.Roles)
-            {
-                unitOfWork.Roles.Attach(role);
-            }
-
-            await unitOfWork.Users.AddAsync(user, cancellationToken);
-
-            await unitOfWork.SaveChangesAsync(cancellationToken);
-
-            return user.Id;
+        if (emailResult.IsFailure)
+        {
+            return Result.Failure<Guid>(emailResult.Error);
         }
+
+        if (usernameResult.IsFailure)
+        {
+            return Result.Failure<Guid>(usernameResult.Error);
+        }
+
+        if (passwordResult.IsFailure)
+        {
+            return Result.Failure<Guid>(passwordResult.Error);
+        }
+
+        if (firstNameResult.IsFailure)
+        {
+            return Result.Failure<Guid>(firstNameResult.Error);
+        }
+
+        if (lastNameResult.IsFailure)
+        {
+            return Result.Failure<Guid>(lastNameResult.Error);
+        }
+
+        bool isEmailInUse = await unitOfWork.Users.AnyAsync(
+            user => (string)user.Email == request.Email,
+            cancellationToken);
+
+        bool isUsernameInUse = await unitOfWork.Users.AnyAsync(
+            user => (string)user.Username == request.Username,
+            cancellationToken);
+
+        if (isEmailInUse)
+        {
+            return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Email)));
+        }
+
+        if (isUsernameInUse)
+        {
+            return Result.Failure<Guid>(UserErrors.NotUnique(nameof(request.Username)));
+        }
+
+        Role roleToAssign = Role.All.Select(role => role.Name).Contains(request.Role)
+            ? Role.All.First(role => role.Name == request.Role)
+            : Role.User;
+
+        User user = UserBuilder
+            .Empty()
+            .WithEmail(emailResult.Value)
+            .WithUsername(usernameResult.Value)
+            .WithPassword(passwordResult.Value)
+            .WithName(firstNameResult.Value, lastNameResult.Value)
+            .WithRole(roleToAssign)
+            .Verified(request.Verified ?? false)
+            .RequireEmailVerification(
+                request.Verified ?? false ? null : Guid.NewGuid(),
+                request.Verified ?? false ? DateTime.MinValue : dateTimeProvider.UtcNow.AddDays(5))
+            .Build(dateTimeProvider.UtcNow);
+
+        foreach (Role role in user.Roles)
+        {
+            unitOfWork.Roles.Attach(role);
+        }
+
+        await unitOfWork.Users.AddAsync(user, cancellationToken);
+
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+
+        return user.Id;
+    }
 }

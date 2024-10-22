@@ -4,10 +4,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Users;
 using Overseer.Api.Features.Users.Entities;
+using Overseer.Api.Services.Time;
 
 namespace Overseer.Api.Services.Authentication;
 

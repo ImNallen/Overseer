@@ -1,7 +1,6 @@
 using System.Security.Cryptography;
-using Overseer.Api.Abstractions.Encryption;
 
-namespace Overseer.Api.Services.Authentication;
+namespace Overseer.Api.Services.Encryption;
 
 public class PasswordGenerator : IPasswordGenerator
 {

@@ -1,0 +1,110 @@
+@using System.Timers
+
+<div class="rounded-md z-50 @_toastTypeClass transition-all duration-300 ease-in-out @(IsVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-[-20px]") relative overflow-hidden" @onclick="Hide">
+    <div class="flex items-center px-6 py-4">
+        @switch (Type)
+        {
+            case ToastType.Success:
+                <i class="ph ph-check-circle mr-3 text-4xl"></i>
+                break;
+            case ToastType.Error:
+                <i class="ph ph-bug mr-3 text-4xl"></i>
+                break;
+            case ToastType.Info:
+                <i class="ph ph-info mr-3 text-4xl"></i>
+                break;
+            case ToastType.Warning:
+                <i class="ph ph-warning-diamond mr-3 text-4xl"></i>
+                break;
+            default:
+                <i class="ph ph-info mr-3 text-4xl"></i>
+                break;
+        }
+        <div class="flex-grow">
+            <h3 class="font-bold text-lg">@Title</h3>
+            <p class="mt-1">@Message</p>
+        </div>
+    </div>
+    <div class="absolute bottom-0 left-0 h-1 @_progressBarClass transition-all duration-100 ease-linear" style="width: @(_progressWidth)%"></div>
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; } = string.Empty;
+    [Parameter] public string Message { get; set; } = string.Empty;
+    [Parameter] public ToastType Type { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private bool IsVisible { get; set; }
+    private string _toastTypeClass = "bg-surface";
+    private string _progressBarClass = "";
+    private Timer? _timer;
+    private Timer? _progressTimer;
+    private double _progressWidth = 100;
+    private const int ToastDuration = 5000;
+    private const int ProgressUpdateInterval = 100;
+
+    protected override void OnInitialized()
+    {
+        SetNotificationStyle();
+        Show();
+    }
+
+    private void Show()
+    {
+        IsVisible = true;
+        _progressWidth = 100;
+        StateHasChanged();
+
+        _timer = new Timer(ToastDuration);
+        _timer.Elapsed += async (sender, e) => await Hide();
+        _timer.AutoReset = false;
+        _timer.Start();
+
+        _progressTimer = new Timer(ProgressUpdateInterval);
+        _progressTimer.Elapsed += UpdateProgress;
+        _progressTimer.AutoReset = true;
+        _progressTimer.Start();
+    }
+
+    private async Task Hide()
+    {
+        IsVisible = false;
+        _timer?.Stop();
+        _timer?.Dispose();
+        _progressTimer?.Stop();
+        _progressTimer?.Dispose();
+        await InvokeAsync(StateHasChanged);
+        await OnClose.InvokeAsync();
+    }
+
+    private void UpdateProgress(object? sender, ElapsedEventArgs e)
+    {
+        _progressWidth -= (ProgressUpdateInterval / (double)ToastDuration) * 100;
+        if (_progressWidth <= 0)
+        {
+            _progressWidth = 0;
+            _progressTimer?.Stop();
+        }
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void SetNotificationStyle()
+    {
+        (_toastTypeClass, _progressBarClass) = Type switch
+        {
+            ToastType.Success => ("bg-green-400 text-white", "bg-green-500"),
+            ToastType.Error => ("bg-red-400 text-white", "bg-red-500"),
+            ToastType.Info => ("bg-blue-400 text-white", "bg-blue-500"),
+            ToastType.Warning => ("bg-yellow-400 text-white", "bg-yellow-500"),
+            _ => ("bg-surface text-white", "bg-highlight")
+        };
+    }
+
+    public enum ToastType
+    {
+        Success,
+        Error,
+        Info,
+        Warning
+    }
+}

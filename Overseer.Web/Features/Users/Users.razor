@@ -1,0 +1,175 @@
+@page "/authentication/users"
+
+@inject IUsersClient UsersClient
+
+<PageTitle>Overseer - Users</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <div class="flex flex-col h-full">
+            <div class="bg-surface w-full h-14 border-b border-highlight">
+                <p class="flex items-center text-1xl h-full ml-2">Users</p>
+            </div>
+            <div class="flex justify-between bg-foreground w-full h-14 border-b border-highlight">
+                <div class="flex items-center h-full ml-4">
+                    <div class="relative">
+                        <input type="text" @bind="searchTerm" @oninput="@((ChangeEventArgs e) => Search(e))"
+                            placeholder="Search..."
+                            class="placeholder:text-white/50 placeholder:text-[10px] pl-8 pr-8 py-1 bg-foreground border border-highlight rounded-md focus:outline-none text-xs" />
+                        <i
+                            class="ph ph-magnifying-glass absolute left-2 top-1/2 transform -translate-y-1/2 text-white/50"></i>
+                        @if (!string.IsNullOrEmpty(searchTerm))
+                        {
+                            <button @onclick="ClearSearch"
+                                class="absolute right-1 top-1/2 transform -translate-y-1/2 text-white/50 hover:text-white focus:outline-none">
+                                <i class="ph ph-x text-sm"></i>
+                            </button>
+                        }
+                    </div>
+                    <div class="ml-2 relative hidden lg:block">
+                        <select @bind="sortColumn" @oninput="@((ChangeEventArgs e) => Sort(e))"
+                            class="appearance-none bg-foreground border border-highlight rounded-md text-white text-xs pl-2 pr-8 py-1 focus:outline-none">
+                            <option value="createdat">Sort by createdAt</option>
+                            <option value="email">Sort by email</option>
+                            <option value="username">Sort by username</option>
+                        </select>
+                        <i
+                            class="ph ph-caret-down absolute right-2 top-1/2 transform -translate-y-1/2 text-white/50 pointer-events-none"></i>
+                    </div>
+                    <div class="ml-2 relative hidden lg:block">
+                        <select @bind="sortOrder" @oninput="@((ChangeEventArgs e) => Order(e))"
+                            class="appearance-none bg-foreground border border-highlight rounded-md text-white text-xs pl-2 pr-8 py-1 focus:outline-none">
+                            <option value="desc">Descending</option>
+                            <option value="asc">Ascending</option>
+                        </select>
+                        <i
+                            class="ph ph-caret-down absolute right-2 top-1/2 transform -translate-y-1/2 text-white/50 pointer-events-none"></i>
+                    </div>
+                </div>
+                <div class="flex items-center h-full mr-4">
+                    <button @onclick="@(() => Search())"
+                        class="flex items-center justify-center bg-foreground border border-highlight rounded-md text-white text-xs px-3 py-1 ml-2 hover:bg-highlight focus:outline-none transition-colors duration-200">
+                        <i class="ph ph-arrows-clockwise mr-1"></i>
+                        Refresh
+                    </button>
+                    <button
+                        class="flex items-center justify-center bg-green-600 rounded-md text-white text-xs px-3 py-1 ml-2 hover:bg-green-800 focus:outline-none transition-colors duration-200">
+                        <i class="ph ph-plus mr-1"></i>
+                        Add User
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-hidden">
+                <div class="overflow-auto h-full">
+                    @if (users != null)
+                    {
+                        <table class="w-full table-auto">
+                            <thead class="w-full h-8 bg-foreground sticky top-0 z-10">
+                                <tr>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">UID</th>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">Email</th>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">Username</th>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">Display Name</th>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">Role</th>
+                                    <th class="border-b border-r border-highlight text-left text-xs px-2">Created At</th>
+                                    <th class="border-b border-highlight text-left text-xs px-2">Verified Email</th>
+                                </tr>
+                            </thead>
+                            <tbody class="w-full bg-surface cursor-pointer">
+                                @foreach (var user in users)
+                                {
+                                    <tr class="hover:bg-foreground h-8">
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.Id</td>
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.Email</td>
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.Username</td>
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.FirstName @user.LastName</td>
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.Role</td>
+                                        <td
+                                            class="border-b border-r border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.CreatedAt.ToString("MM/dd/yyyy HH:mm")</td>
+                                        <td class="border-b border-highlight text-left text-[10px] px-2 whitespace-nowrap">
+                                            @user.IsEmailVerified</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                </div>
+            </div>
+            <div class="bg-surface w-full h-8 border-t border-highlight">
+                @if (users != null)
+                {
+                    <p class="flex items-center text-xs h-full ml-2">Total: @total users</p>
+                }
+                else
+                {
+                    <p class="flex items-center text-xs h-full ml-2">Loading users...</p>
+                }
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <Unauthorized />
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<UserResponse>? users { get; set; } = null;
+    private string searchTerm = string.Empty;
+    private string sortColumn = "createdat";
+    private string sortOrder = "desc";
+    private int page = 1;
+    private int pageSize = 25;
+    private int total = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var usersResponse = await UsersClient.GetUsers(searchTerm: searchTerm, sortColumn: sortColumn, sortOrder: sortOrder,
+        page: page, pageSize: pageSize);
+
+        total = usersResponse.TotalCount;
+
+        users = usersResponse.Items;
+    }
+
+    private async Task Search(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? string.Empty;
+        await Search();
+    }
+
+    private async Task Sort(ChangeEventArgs e)
+    {
+        sortColumn = e.Value?.ToString() ?? "createdat";
+        await Search();
+    }
+
+    private async Task Order(ChangeEventArgs e)
+    {
+        sortOrder = e.Value?.ToString() ?? "desc";
+        await Search();
+    }
+
+    private async Task Search()
+    {
+        page = 1;
+        await OnInitializedAsync();
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = string.Empty;
+        page = 1;
+        await OnInitializedAsync();
+    }
+}

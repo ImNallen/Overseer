@@ -1,0 +1,40 @@
+### Create
+POST http://localhost:5000/api/v1/users
+content-type: application/json
+
+{
+    "username": "admin",
+    "password": "overseer",
+    "email": "admin@overseer.com",
+    "firstname": "admin",
+    "lastname": "admin",
+    "role": "Admin"
+}
+
+### Verify
+GET http://localhost:5000/api/v1/users/verify?token=50bac332-4344-4da0-a5b1-199f841f1e38
+content-type: application/json
+
+### Login
+POST http://localhost:5000/api/v1/users/login
+content-type: application/json
+
+{
+    "username": "admin",
+    "password": "overseer"
+}
+
+### Profile
+GET http://localhost:5000/api/v1/users/profile
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2ZjA5MDlmYy1iN2ZhLTRiOGQtODdhZi0xNDc0Mzc5YWNmNTQiLCJlbWFpbCI6ImFkbWluQG92ZXJzZWVyLmNvbSIsInVuaXF1ZV9uYW1lIjoiYWRtaW4iLCJqdGkiOiJkY2NiNDczZC0xYWU2LTRhNWUtODkzNi03ZGM5ODc5MTkxZjkiLCJnaXZlbl9uYW1lIjoiYWRtaW4iLCJmYW1pbHlfbmFtZSI6ImFkbWluIiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiQWRtaW4iLCJleHAiOjE3MjkwODkzODgsImlzcyI6Ik92ZXJzZWVyIiwiYXVkIjoiT3ZlcnNlZXIifQ.QlGO82__e0I4cPERQvpbO9Rimcqdup9xdxFiR9Fb9nQ
+
+### Update
+PUT http://localhost:5000/api/v1/users/profile
+content-type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI5YmNiZjYzOS1kMDNhLTQzNDgtOGU4YS0xNzNhNTUwOGVmMTUiLCJlbWFpbCI6InRlc3RAdGVzdC5jb20iLCJ1bmlxdWVfbmFtZSI6InRlc3QxMjM0NSIsImp0aSI6IjhiNGJlODNjLWRhYmEtNGM5Zi1hNzVkLTE1M2E1MjAxOGFmYSIsImdpdmVuX25hbWUiOiJ0ZXN0MiIsImZhbWlseV9uYW1lIjoidGVzdDIiLCJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiJVc2VyIiwiZXhwIjoxNzI5MDg4OTYxLCJpc3MiOiJPdmVyc2VlciIsImF1ZCI6Ik92ZXJzZWVyIn0.EvL7rN7YOXMovJGQIWRH7YAun6MvaFfGSB9F9y5JqSc
+
+{
+    "firstname": "test",
+    "lastname": "test"
+}

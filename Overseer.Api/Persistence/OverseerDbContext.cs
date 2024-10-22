@@ -1,11 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Features.Customers.Entities;
 using Overseer.Api.Features.Users.Entities;
 using Overseer.Api.Services.Outbox;
-using Overseer.Api.Services.Serialization;
+using Overseer.Api.Utilities.Serialization;
 
 namespace Overseer.Api.Persistence;
 

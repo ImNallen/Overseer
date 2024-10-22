@@ -8,13 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using Overseer.Api.Abstractions.Behaviors;
-using Overseer.Api.Abstractions.Encryption;
-using Overseer.Api.Abstractions.Exceptions;
-using Overseer.Api.Abstractions.Options;
-using Overseer.Api.Abstractions.Persistence;
-using Overseer.Api.Abstractions.Time;
 using Overseer.Api.Features;
 using Overseer.Api.Features.Abstractions;
 using Overseer.Api.Persistence;
@@ -23,6 +16,8 @@ using Overseer.Api.Services.Authorization;
 using Overseer.Api.Services.Encryption;
 using Overseer.Api.Services.Outbox;
 using Overseer.Api.Services.Time;
+using Overseer.Api.Utilities.Behaviors;
+using Overseer.Api.Utilities.Exceptions;
 using Quartz;
 
 namespace Overseer.Api;
@@ -38,7 +33,7 @@ public static class DependencyInjection
             .AddMediator()
             .AddFluentValidation(assembly)
             .AddEndpoints(assembly)
-            .AddSwagger()
+            .AddApiVersioning()
             .AddHandlers()
             .AddServices()
             .SetupQuartz(configuration)
@@ -60,10 +55,8 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection AddSwagger(this IServiceCollection services)
+    private static IServiceCollection AddApiVersioning(this IServiceCollection services)
     {
-        services.AddEndpointsApiExplorer();
-
         services.AddApiVersioning(options =>
         {
             options.DefaultApiVersion = new ApiVersion(1);
@@ -72,35 +65,6 @@ public static class DependencyInjection
         {
             options.GroupNameFormat = "'v'V";
             options.SubstituteApiVersionInUrl = true;
-        });
-
-        services.ConfigureOptions<ConfigureSwaggerGenOptions>();
-
-        services.AddSwaggerGen(options =>
-        {
-            options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
-                Name = "Authorization",
-                In = ParameterLocation.Header,
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
         });
 
         return services;

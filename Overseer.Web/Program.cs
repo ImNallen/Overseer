@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Overseer.Web;
 using Overseer.Web.Clients;
-using Overseer.Web.Services;
 using Overseer.Web.Services.Auth;
+using Overseer.Web.Services.Toast;
 using Refit;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -29,7 +29,6 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthorizationStateProvider>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, RoleAuthorizationPolicyProvider>();
 
-builder.Services.AddScoped<ThemeService>();
 builder.Services.AddScoped<ToastService>();
 
 await builder.Build().RunAsync();

@@ -1,0 +1,162 @@
+@inject NavigationManager NavigationManager
+@inject IUsersClient UsersClient
+@inject ILocalStorageService LocalStorage
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div
+    class="group h-screen w-12 hover:w-60 flex flex-col border-r border-highlight bg-surface transition-all duration-300 ease-in-out overflow-hidden">
+    <div class="flex-1 flex flex-col justify-between">
+        <div class="flex flex-col">
+            <NavLink href="/">
+                <img src="images/overseer_logo.svg" alt="Overseer Logo" class="my-4 ml-1.5 w-8 h-8" />
+            </NavLink>
+            <NavLink href="/" class="flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.All">
+                <i class="ph ph-house m-2 text-xl"></i>
+                <span
+                    class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Home</span>
+                <span
+                    class="ml-2 px-2 py-1 bg-orange-500/10 border border-orange-500 text-[10px] text-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">ALPHA</span>
+            </NavLink>
+            <div class="border-t border-highlight my-2 mx-2"></div>
+            <NavLink href="/customers" class="flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.Prefix">
+                <i class="ph ph-users-three m-2 text-xl"></i>
+                <span
+                    class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Customers</span>
+                <span
+                    class="ml-2 px-2 py-1 bg-orange-500/10 border border-orange-500 text-[10px] text-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">ALPHA</span>
+            </NavLink>
+            <NavLink href="/products" class="mt-1 flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.Prefix">
+                <i class="ph ph-cube m-2 text-xl"></i>
+                <span
+                    class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Products</span>
+                <span
+                    class="ml-2 px-2 py-1 bg-orange-500/10 border border-orange-500 text-[10px] text-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">ALPHA</span>
+            </NavLink>
+            <div class="border-t border-highlight my-2 mx-2"></div>
+            <AuthorizeView Roles="Admin">
+                <Authorized>
+                    <NavLink href="/authentication/users"
+                        class="mt-1 flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                        ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.Prefix">
+                        <i class="ph ph-key m-2 text-xl"></i>
+                        <span
+                            class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Authentication</span>
+                        <span
+                            class="ml-2 px-2 py-1 bg-orange-500/10 border border-orange-500 text-[10px] text-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">ALPHA</span>
+                    </NavLink>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+        <div class="flex flex-col">
+            <NavLink href="/settings" class="mt-1 flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.Prefix">
+                <i class="ph ph-gear-six m-2 text-xl"></i>
+                <span
+                    class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Settings</span>
+                <span
+                    class="ml-2 px-2 py-1 bg-orange-500/10 border border-orange-500 text-[10px] text-yellow-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">ALPHA</span>
+            </NavLink>
+            <NavLink href="/profile" class="mt-1 flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded"
+                ActiveClass="shadow-md bg-highlight" Match="NavLinkMatch.Prefix">
+                <i class="ph ph-user-circle m-2 text-xl"></i>
+                <div
+                    class="max-w-40 flex flex-col opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">
+                    <span class="text-white font-bold text-[10px] truncate">@(profile?.FirstName)
+                        @(profile?.LastName)</span>
+                    <p class="text-white/75 text-[8px] truncate">@(profile?.Email)</p>
+                </div>
+            </NavLink>
+            <button @onclick="Logout"
+                class="mt-1 mb-2 flex items-center mx-1 hover:shadow-md hover:bg-foreground rounded">
+                <i class="ph ph-sign-out m-2 text-xl"></i>
+                <span
+                    class="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-in-out">Logout</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+@if (NavigationManager.Uri.Contains("/customers"))
+{
+    <Sidemenu Title="Customers">
+        <SidemenuItem Title="Manage">
+            <SidemenuLink Title="Customers" Href="/customers" />
+        </SidemenuItem>
+        <SidemenuItem Title="Reports"></SidemenuItem>
+    </Sidemenu>
+}
+@if (NavigationManager.Uri.Contains("/products"))
+{
+    <Sidemenu Title="Products">
+        <SidemenuItem Title="Manage">
+            <SidemenuLink Title="Products" Href="/products" />
+            <SidemenuLink Title="Suppliers" Href="/products/suppliers" />
+        </SidemenuItem>
+        <SidemenuItem Title="Settings"></SidemenuItem>
+        <SidemenuItem Title="Import"></SidemenuItem>
+        <SidemenuItem Title="Export"></SidemenuItem>
+    </Sidemenu>
+}
+@if (NavigationManager.Uri.Contains("/users"))
+{
+    <AuthorizeView Roles="Admin">
+        <Authorized>
+            <Sidemenu Title="Authentication">
+                <SidemenuItem Title="Manage">
+                    <SidemenuLink Title="Users" Href="/authentication/users" />
+                    <SidemenuLink Title="Roles" Href="/authentication/roles" />
+                    <SidemenuLink Title="Permissions" Href="/authentication/permissions" />
+                </SidemenuItem>
+                <SidemenuItem Title="Settings"></SidemenuItem>
+            </Sidemenu>
+        </Authorized>
+    </AuthorizeView>
+}
+@if (NavigationManager.Uri.Contains("/profile"))
+{
+    <Sidemenu Title="Profile">
+        <SidemenuItem Title="Manage">
+            <SidemenuLink Title="Profile" Href="/profile" />
+            <SidemenuLink Title="Password" Href="/profile/password" />
+        </SidemenuItem>
+    </Sidemenu>
+}
+
+@code {
+    private ProfileResponse? profile;
+
+    protected override async Task OnInitializedAsync()
+    {
+        NavigationManager.LocationChanged += LocationChanged!;
+        profile = await UsersClient.GetProfile();
+
+        if (profile != null)
+        {
+            profile.FirstName = char.ToUpper(profile.FirstName[0]) + profile.FirstName.Substring(1);
+            profile.LastName = char.ToUpper(profile.LastName[0]) + profile.LastName.Substring(1);
+        }
+    }
+
+    private void LocationChanged(object sender, LocationChangedEventArgs e)
+    {
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= LocationChanged!;
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("accessToken");
+        await LocalStorage.RemoveItemAsync("refreshToken");
+
+        await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        NavigationManager.NavigateTo("/");
+    }
+}

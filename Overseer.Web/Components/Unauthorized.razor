@@ -1,0 +1,19 @@
+@inject NavigationManager NavigationManager
+
+<div class="flex flex-col items-center justify-center h-screen bg-background">
+    <div class="text-center">
+        <i class="ph-fill ph-lock text-8xl text-red-500"></i>
+        <h1 class="text-3xl font-bold mt-4">Unauthorized Access</h1>
+        <p class="text-lg mb-8">Sorry, you don't have permission to view this page.</p>
+        <button @onclick="NavigateToHome" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 ease-in-out">
+            Take me home
+        </button>
+    </div>
+</div>
+
+@code {
+    private void NavigateToHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}

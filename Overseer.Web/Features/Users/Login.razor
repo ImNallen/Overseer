@@ -5,6 +5,7 @@
 @using Overseer.Web.Clients
 @using Overseer.Web.Models.Users
 @using Refit
+@using System.ComponentModel.DataAnnotations
 
 @inject IUsersClient UsersClient
 @inject NavigationManager NavigationManager
@@ -14,43 +15,55 @@
 
 <PageTitle>Overseer - Login</PageTitle>
 
-<div class="flex items-center justify-center h-screen bg-light-background dark:bg-dark-background">
-    <div>
-        <div class="bg-light-surface dark:bg-dark-surface shadow-md rounded-lg px-8 pt-4 pb-8 mb-4">
-            <div class="mb-8 text-center">
-                <img src="images/overseer_logo.svg" alt="Overseer Logo" class="h-40 w-40 mx-auto my-8" />
-            </div>
-            <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
-                <DataAnnotationsValidator />
-                <div class="mb-4">
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="username">
-                        Username
-                    </label>
-                    <InputText id="username" class="shadow appearance-none border-none rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white dark:bg-dark-foreground dark:text-white" @bind-Value="loginModel.Username" />
-                    <ValidationMessage For="@(() => loginModel.Username)" />
-                </div>
-                <div>
-                    <label class="block text-gray-700 dark:text-gray-300 text-sm font-bold mb-2" for="password">
-                        Password
-                    </label>
-                    <InputText type="password" id="password" class="shadow appearance-none border-none rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline bg-white dark:bg-dark-foreground dark:text-white" @bind-Value="loginModel.Password" />
-                    <ValidationMessage For="@(() => loginModel.Password)" />
-                </div>
-                <div class="mb-6">
-                    <a class="inline-block align-baseline font-bold text-xs hover:text-primary" href="#">
-                        Forgot Password?
-                    </a>
-                </div>
-                <div class="flex flex-col items-center justify-between mb-4">
-                    <button class="w-full bg-gradient-to-br from-accent to-primary text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105" type="submit">
-                        Sign In
-                    </button>
-                </div>
-            </EditForm>
+<div class="flex flex-col min-h-screen bg-background text-white">
+    <header class="bg-background p-6">
+        <div class="flex justify-between items-center">
+            <a href="/" class="flex items-center">
+                <img src="images/overseer_logo.svg" alt="Overseer Logo" class="h-8 w-8 mr-1" />
+                <span class="text-md font-bold">Overseer</span>
+            </a>
+            <a href="/docs" class="text-sm px-4 py-2 bg-white/5 rounded-md border border-white/25 hover:border-white/50 transition duration-200 flex items-center">
+                <i class="ph ph-file-text mr-2 text-xl"></i>
+                Documentation
+            </a>
         </div>
-        <p class="text-center text-gray-700 dark:text-gray-300 text-xs">
-            &copy;2024 Overseer. All rights reserved.
-        </p>
+    </header>
+
+    <div class="flex-grow flex items-center justify-center">
+        <div class="w-full max-w-sm">
+            <div class="text-left mb-6">
+                <h2 class="text-3xl">Welcome back</h2>
+                <p class="text-white/50 mt-4 text-xs">Sign in to your account</p>
+            </div>
+
+            <div>
+                <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                    <DataAnnotationsValidator />
+                    <div class="space-y-4">
+                        <div>
+                            <label for="username" class="text-white/50 block text-xs font-medium mb-2">Username</label>
+                            <InputText id="username" @bind-Value="loginModel.Username" class="placeholder:text-white/50 placeholder:text-xs w-full px-3 py-2 bg-background border border-white/25 rounded-md focus:outline-none focus:border-white/50 hover:border-white/50" placeholder="Giblit124" />
+                            <ValidationMessage For="@(() => loginModel.Username)" class="text-danger text-xs mt-1" />
+                        </div>
+                        <div class="mt-2">
+                            <div class="flex items-center justify-between mb-2">
+                                <label for="password" class="text-white/50 block text-xs font-medium">Password</label>
+                                <a href="#" class="text-xs text-white/50 hover:text-white/75 hover:underline">Forgot Password?</a>
+                            </div>
+                            <InputText type="password" id="password" @bind-Value="loginModel.Password" class="placeholder:text-white/50 placeholder:text-xs w-full px-3 py-2 bg-background border border-white/25 rounded-md focus:outline-none focus:border-white/50 hover:border-white/50" placeholder="********" />
+                            <ValidationMessage For="@(() => loginModel.Password)" class="text-danger text-xs mt-1"/>
+                        </div>
+                        <div>
+                            <button type="submit" class="mt-6 w-full py-2 px-4 bg-green-400 text-white rounded-md hover:bg-green-500 transition duration-200">Sign In</button>
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+
+            <p class="text-center mt-6 text-xs text-white/50">
+                By continuing, you agree to Overseer's <a href="#" class="text-accent hover:text-white/75 underline">Terms of Service</a> and <a href="#" class="text-accent hover:text-white/75 underline">Privacy Policy</a>.
+            </p>
+        </div>
     </div>
 </div>
 
@@ -73,23 +86,14 @@
         catch (ApiException ex)
         {
             var json = JObject.Parse(ex.Content!);
-
             var message = json.Value<string>("detail");
-
             await ToastService.Show("Error", message!, Toast.ToastType.Error);
-
             loginModel = new();
         }
         catch (Exception)
         {
             await ToastService.Show("Error", "Invalid username or password", Toast.ToastType.Error);
-
             loginModel = new();
         }
-    }
-    
-    private void NavigateToRegister()
-    {
-        NavigationManager.NavigateTo("/register");
     }
 }

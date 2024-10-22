@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Overseer.Api.Abstractions.Persistence;
 using Overseer.Api.Features.Users.Entities;
+using Overseer.Api.Persistence;
 using Overseer.Api.Services.Authentication;
 
 namespace Overseer.Api.Services.Authorization;
